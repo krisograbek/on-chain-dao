@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/governance/TimeLockController.sol";
+import "@openzeppelin/contracts/governance/TimelockController.sol";
 
-contract TimeLock is TimeLockController {
+contract TimeLock is TimelockController {
     constructor(
         uint256 minDelay,
         address[] memory proposers,
         address[] memory executors
-    ) TimeLockController(minDelay, proposers, executors) {}
+    ) TimelockController(minDelay, proposers, executors) {}
 }
