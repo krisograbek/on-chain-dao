@@ -1,5 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/dist/types";
+import { ethers } from "hardhat";
 
 
 const deployBox: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
@@ -16,6 +17,18 @@ const deployBox: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   });
 
   log(`Deployed Box at ${box.address}`);
+
+  const timeLock = await ethers.getContract("TimeLock");
+  const boxContract = await ethers.getContractAt("Box", box.address);
+
+  // transferOwnership comes from Ownable
+  const transferOwnerTx = await boxContract.transferOwnership(timeLock.address);
+  await transferOwnerTx.wait(1);
+
+  log("Who the owner now?")
+
+  log("Box owner address", await boxContract.owner());
+  log("Time Lock address", timeLock.address);
 
 }
 
