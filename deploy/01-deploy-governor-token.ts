@@ -21,8 +21,11 @@ const deployGovernanceToken: DeployFunction = async (hre: HardhatRuntimeEnvironm
 
 const delegate = async (governanceTokenAddress: string, delegatedAccount: string) => {
   const governanceToken = await ethers.getContractAt("GovernanceToken", governanceTokenAddress); // name, address
+  // delegate comes from ERC20Votes
+  // under the hood it calls the _moveVotingPower()
   const tx = await governanceToken.delegate(delegatedAccount);
   await tx.wait(1);
+  // if there is 0 checkpoints, we didn't delegate
   console.log(`Checkpoints: ${await governanceToken.numCheckpoints(delegatedAccount)}`);
 }
 
