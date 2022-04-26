@@ -4,14 +4,18 @@ import { VOTING_DELAY, VOTING_PERIOD, QUORUM_PERCENTAGE } from "../helper-hardha
 
 const deployGovernorContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { getNamedAccounts, deployments } = hre;
-  const { deploy, log } = deployments;
+  const { deploy, log, get } = deployments;
   const { deployer } = await getNamedAccounts();
+
+  // get is a convienient function to get the contracts
+  const governanceToken = await get("GovernanceToken");
+  const timeLock = await get("TimeLock");
 
   log(`Deploying Governor Contract by ${deployer}`);
 
   const governorContract = await deploy("GovernorContract", {
     from: deployer,
-    args: [],
+    args: [governanceToken.address, timeLock.address, VOTING_DELAY, VOTING_PERIOD, QUORUM_PERCENTAGE],
     log: true
   });
 
