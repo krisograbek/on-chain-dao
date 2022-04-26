@@ -14,8 +14,6 @@ const deployTimeLock: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
     log: true
   });
   log(`Deployed TimeLock contract at ${timelock.address}`)
-
-
 }
 
 export default deployTimeLock;
