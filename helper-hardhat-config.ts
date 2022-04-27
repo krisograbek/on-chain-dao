@@ -5,7 +5,7 @@ export const QUORUM_PERCENTAGE = 4; // minimal number of votes to make it an eli
 export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 
 export const FUNC = "store";
-export const NEW_STORE_VALUE = [21];
+export const NEW_STORE_VALUE = [22];
 export const PROPOSAL_DESCRIPTION = `# 1 First proposal. \n We should change our store value!`;
 
 export const developmentChains = ["hardhat", "localhost"];
