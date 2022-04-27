@@ -14,7 +14,7 @@ const main = async (proposalIndex: number) => {
 
   console.log("Voting! In proposal", proposalId)
   // 0 => Against, 1 => For, 2 => Abstain
-  const voteWay = 1;
+  const voteWay = 0;
   const reason = "The new value is much better";
 
   const proposalState = await governor.state(proposalId)
