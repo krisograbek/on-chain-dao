@@ -3,6 +3,7 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { VOTING_DELAY, VOTING_PERIOD, QUORUM_PERCENTAGE } from "../helper-hardhat-config";
 
 const deployGovernorContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+  // @ts-ignore
   const { getNamedAccounts, deployments } = hre;
   const { deploy, log, get } = deployments;
   const { deployer } = await getNamedAccounts();
