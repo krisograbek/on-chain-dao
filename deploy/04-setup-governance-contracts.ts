@@ -1,9 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/dist/types";
+// @ts-ignore
 import { ethers } from "hardhat";
 import { ADDRESS_ZERO } from "../helper-hardhat-config";
 
 const setupContracts: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+  // @ts-ignore
   const { getNamedAccounts, deployments } = hre;
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
