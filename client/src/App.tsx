@@ -3,15 +3,16 @@ import './App.css';
 import Web3 from 'web3';
 
 import { contractAbi, contractAddress } from './utils/constants';
+import Proposals from './Proposals/Proposals';
 
 // using local node
 const web3 = new Web3("ws://localhost:8545")
 const greeterContract = new web3.eth.Contract(contractAbi, contractAddress);
 
-
 function App() {
   const [newGreetings, setNewGreetings] = useState("");
   const [greetings, setGreetings] = useState("")
+  const [proposals, setProposals] = useState<Array<Proposal>>([]);
 
   console.log(greeterContract)
 
@@ -29,9 +30,13 @@ function App() {
         fromBlock: 0,
         toBlock: 'latest'
       });
-      // events.map((event) => {
-      //   console.log("New Greeting:", event.returnValues.newGreetings)
-      // })
+      const allProposals: Array<Proposal> = events.map((event) => {
+        const { proposer, proposalId, calldatas, description, targets, values } = event.returnValues;
+        const proposal: Proposal = { proposer, proposalId, calldatas, description, targets };
+        console.log("Proposal", proposal);
+        return proposal;
+      });
+      setProposals(allProposals);
       console.log("Events", events);
     } catch (error) {
       console.log(error);
@@ -56,6 +61,7 @@ function App() {
       <button onClick={() => getEvents()}>
         Get Events
       </button>
+      <Proposals proposals={proposals} />
       {/* <input placeholder="New greetings" type="text" value={newGreetings}
         onChange={(e) => setNewGreetings(e.target.value)}
       />
