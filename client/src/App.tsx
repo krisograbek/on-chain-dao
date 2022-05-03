@@ -23,6 +23,20 @@ function App() {
   //   initialGreets();
   // }, [])
 
+  const getEvents = async () => {
+    try {
+      const events = await greeterContract.getPastEvents('ProposalCreated', {
+        fromBlock: 0,
+        toBlock: 'latest'
+      });
+      // events.map((event) => {
+      //   console.log("New Greeting:", event.returnValues.newGreetings)
+      // })
+      console.log("Events", events);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const greetMe = async () => {
     const greetMsg = await greeterContract.methods.greet().call();
@@ -35,7 +49,13 @@ function App() {
   }
 
   return (
-    <div className="App"> Hello
+    <div className="App">
+      <p>
+        Hello
+      </p>
+      <button onClick={() => getEvents()}>
+        Get Events
+      </button>
       {/* <input placeholder="New greetings" type="text" value={newGreetings}
         onChange={(e) => setNewGreetings(e.target.value)}
       />
