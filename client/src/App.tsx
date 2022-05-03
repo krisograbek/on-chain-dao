@@ -31,7 +31,7 @@ function App() {
         toBlock: 'latest'
       });
       const allProposals: Array<Proposal> = events.map((event) => {
-        const { proposer, proposalId, calldatas, description, targets, values } = event.returnValues;
+        const { proposer, proposalId, calldatas, description, targets } = event.returnValues;
         const proposal: Proposal = { proposer, proposalId, calldatas, description, targets };
         console.log("Proposal", proposal);
         return proposal;

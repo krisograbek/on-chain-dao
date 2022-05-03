@@ -1,4 +1,5 @@
 import React from 'react'
+import Proposal from './Proposal/Proposal';
 
 type Props = {
   proposals: Array<Proposal>
@@ -9,7 +10,7 @@ const Proposals = ({ proposals }: Props) => {
     <div>
       {proposals.map((proposal: Proposal) => (
         <div key={proposal.proposalId}>
-          {proposal.description}
+          <Proposal proposal={proposal} />
         </div>
       ))}
     </div>

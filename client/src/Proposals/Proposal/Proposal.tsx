@@ -1,8 +1,16 @@
 import React from 'react'
+import Box from '@mui/material/Box';
 
-const Proposal = () => {
+type Props = {
+  proposal: Proposal
+}
+
+const Proposal = ({ proposal }: Props) => {
+  const { proposalId, description } = proposal;
   return (
-    <div>Proposal</div>
+    <Box sx={{ my: 4 }}>
+      {proposalId} {description}
+    </Box>
   )
 }
 
