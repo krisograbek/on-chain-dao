@@ -11,4 +11,5 @@ declare interface Proposal {
   calldatas: Array<string>;
   description: number;
   targets: Array<string>;
+  state: number;
 }
