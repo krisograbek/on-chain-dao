@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import './App.css';
 import Web3 from 'web3';
 
 import { contractAbi, contractAddress } from './utils/constants';
-import Proposals from './Proposals/Proposals';
+import Proposals from './components/Proposals/Proposals';
+import Navbar from './components/Navbar';
+import ProposalForm from './components/Proposals/ProposalForm';
 
 // using local node
 const web3 = new Web3("ws://localhost:8545")
@@ -58,16 +61,18 @@ function App() {
   }
 
   return (
-    <Container maxWidth='md'>
-      <div className="App">
-        <p>
-          Hello
-        </p>
-        <Button variant="contained" onClick={() => getEvents()}>
-          Get Events
-        </Button>
-        <Proposals proposals={proposals} />
-      </div>
+    <Container maxWidth='lg'>
+      <Grid container className="App">
+        <Grid item sm={6}>
+          <Navbar onClick={() => getEvents()} />
+        </Grid>
+        <Grid item sm={12} md={8}>
+          <Proposals proposals={proposals} />
+        </Grid>
+        <Grid item sm={12} md={4}>
+          <ProposalForm />
+        </Grid>
+      </Grid>
     </Container>
   );
 }

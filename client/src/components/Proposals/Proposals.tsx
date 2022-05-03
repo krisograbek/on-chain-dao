@@ -1,5 +1,5 @@
 import React from 'react'
-import Proposal from './Proposal/Proposal';
+import Proposal from './Proposal';
 
 type Props = {
   proposals: Array<Proposal>
