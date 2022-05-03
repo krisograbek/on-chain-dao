@@ -13,11 +13,13 @@ type Props = {
 
 const Proposal = ({ proposal }: Props) => {
   const { proposer, proposalId, calldatas, description, targets, state } = proposal;
+  const currentState = stateEnum[state];
+  const color = currentState === "Active" ? 'green' : 'red';
   return (
     <Box sx={{ my: 4 }}>
-      <Card>
+      <Card sx={{ border: `2px solid ${color}` }}>
         <CardContent>
-          <Typography variant="h6" sx={{ my: 2 }}>
+          <Typography variant="h6" sx={{ my: 2, color: color }}>
             State: {stateEnum[state]}
           </Typography>
           <Typography variant="h6" sx={{ my: 2 }}>
