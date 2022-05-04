@@ -10,10 +10,12 @@ type Props = {
 
 const Navbar = ({ onClick }: Props) => {
   return (
-    <AppBar position='static' color='inherit' sx={{ py: 3 }}>
-      <Button variant="contained" onClick={onClick}>
-        Get Events
-      </Button>
+    <AppBar position='static' color='inherit' sx={{ py: 1 }}>
+      <Toolbar>
+        <Button variant="contained" onClick={onClick}>
+          Get Events
+        </Button>
+      </Toolbar>
     </AppBar>
   )
 }

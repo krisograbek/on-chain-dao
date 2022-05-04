@@ -5,14 +5,15 @@ import Grid from '@mui/material/Grid';
 import './App.css';
 import Web3 from 'web3';
 
-import { contractAbi, contractAddress } from './utils/constants';
+import { boxAbi, boxAddress, governorAbi, governorAddress } from './utils/constants';
 import Proposals from './components/Proposals/Proposals';
 import Navbar from './components/Navbar';
 import ProposalForm from './components/Proposals/ProposalForm';
 
 // using local node
 const web3 = new Web3("ws://localhost:8545")
-const governorContract = new web3.eth.Contract(contractAbi, contractAddress);
+const governorContract = new web3.eth.Contract(governorAbi, governorAddress);
+const boxContract = new web3.eth.Contract(boxAbi, boxAddress);
 
 function App() {
   const [newGreetings, setNewGreetings] = useState("");
@@ -30,6 +31,7 @@ function App() {
   // }, [])
 
   const getEvents = async () => {
+    console.log(web3.eth.abi.encodeParameters(["string", "uint256"], ["store", 2]));
     try {
       const events = await governorContract.getPastEvents('ProposalCreated', {
         fromBlock: 0,
