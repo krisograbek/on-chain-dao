@@ -15,24 +15,23 @@ const web3 = new Web3("ws://localhost:8545")
 const governorContract = new web3.eth.Contract(governorAbi, governorAddress);
 const boxContract = new web3.eth.Contract(boxAbi, boxAddress);
 
+type FormData = {
+  func: string,
+  value: number,
+  description: string
+}
+
 function App() {
   const [newGreetings, setNewGreetings] = useState("");
   const [greetings, setGreetings] = useState("")
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
 
-  console.log(governorContract)
-
-  // useEffect(() => {
-  //   const initialGreets = async () => {
-  //     const greetMsg = await greetMe()
-  //     setGreetings(greetMsg);
-  //   };
-  //   initialGreets();
-  // }, [])
+  // console.log(governorContract)
 
   const getEvents = async () => {
-    console.log(web3.eth.abi.encodeParameters(["string", "uint256"], ["store", 2]));
     try {
+
+
       const events = await governorContract.getPastEvents('ProposalCreated', {
         fromBlock: 0,
         toBlock: 'latest'
@@ -50,6 +49,25 @@ function App() {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
+    e.preventDefault();
+    const encodedData = web3.eth.abi.encodeFunctionCall({
+      name: 'store',
+      type: 'function',
+      inputs: [{
+        type: 'uint256',
+        name: 'newValue'
+      }]
+    }, [`${formData.value}`]);
+
+    await governorContract.methods.propose(
+      [boxAddress],
+      [0],
+      [encodedData],
+      formData.description
+    ).send({ from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' })
   }
 
   const greetMe = async () => {
@@ -72,7 +90,7 @@ function App() {
           <Proposals proposals={proposals} />
         </Grid>
         <Grid item sm={12} md={4}>
-          <ProposalForm />
+          <ProposalForm handleSubmit={handleSubmit} />
         </Grid>
       </Grid>
     </Container>

@@ -10,13 +10,12 @@ type FormData = {
   description: string
 }
 
-const ProposalForm = () => {
-  const [formData, setFormData] = useState<FormData>({ func: "store", value: 0, description: "" })
+type Props = {
+  handleSubmit: Function
+}
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Submitting", formData)
-  }
+const ProposalForm = ({ handleSubmit }: Props) => {
+  const [formData, setFormData] = useState<FormData>({ func: "store", value: 0, description: "" })
 
   const handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -24,7 +23,7 @@ const ProposalForm = () => {
 
   return (
     <Paper className='paper form'>
-      <form autoComplete='off' noValidate onSubmit={handleSubmit}>
+      <form autoComplete='off' noValidate onSubmit={(e) => handleSubmit(e, formData)}>
 
         <Typography variant="h5">Create a new Proposal</Typography>
         <TextField sx={{ m: 1 }} name='value' type='number' variant='outlined' label='Store Value' fullWidth value={formData.value} onChange={handleOnChange} />
