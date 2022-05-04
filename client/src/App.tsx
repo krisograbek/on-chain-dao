@@ -9,6 +9,7 @@ import { boxAbi, boxAddress, governorAbi, governorAddress } from './utils/consta
 import Proposals from './components/Proposals/Proposals';
 import Navbar from './components/Navbar';
 import ProposalForm from './components/Proposals/ProposalForm';
+import { EventEmitter } from 'stream';
 
 // using local node
 const web3 = new Web3("ws://localhost:8545")
@@ -28,10 +29,20 @@ function App() {
 
   // console.log(governorContract)
 
+  useEffect(() => {
+    // subscribe to the ProposalCreated event 
+    governorContract.events.ProposalCreated({
+      fromBlock: "latest"
+    })
+      // update state after the new event
+      .on('data', (event: EventEmitter) => {
+        // TODO: Function to update state
+        console.log("This should fire on Proposal Created", event);
+      })
+  })
+
   const getEvents = async () => {
     try {
-
-
       const events = await governorContract.getPastEvents('ProposalCreated', {
         fromBlock: 0,
         toBlock: 'latest'

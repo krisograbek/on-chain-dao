@@ -14,8 +14,8 @@ type Props = {
 const Proposal = ({ proposal }: Props) => {
   const { proposer, proposalId, calldatas, description, targets, state } = proposal;
   const currentState = stateEnum[state];
-  const color = currentState === "Succeeded" ? 'green'
-    : currentState === "Defeated" ? 'red'
+  const color = ["Succeeded", "Executed"].includes(currentState) ? 'green'
+    : ["Defeated", "Canceled", "Expired"].includes(currentState) ? 'red'
       : currentState === "Active" ? 'blueviolet'
         : 'gray';
   return (
