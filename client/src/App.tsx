@@ -82,8 +82,8 @@ function App() {
 
   return (
     <Container maxWidth='lg'>
-      <Grid container className="App">
-        <Grid item sm={6}>
+      <Grid container className="App" spacing={2}>
+        <Grid item sm={12}>
           <Navbar onClick={() => getEvents()} />
         </Grid>
         <Grid item sm={12} md={8}>

@@ -13,7 +13,7 @@ const Navbar = ({ onClick }: Props) => {
     <AppBar position='static' color='inherit' sx={{ py: 1 }}>
       <Toolbar>
         <Button variant="contained" onClick={onClick}>
-          Get Events
+          Get Proposals
         </Button>
       </Toolbar>
     </AppBar>

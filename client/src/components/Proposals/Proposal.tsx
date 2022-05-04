@@ -14,25 +14,28 @@ type Props = {
 const Proposal = ({ proposal }: Props) => {
   const { proposer, proposalId, calldatas, description, targets, state } = proposal;
   const currentState = stateEnum[state];
-  const color = currentState === "Active" ? 'green' : 'red';
+  const color = currentState === "Succeeded" ? 'green'
+    : currentState === "Defeated" ? 'red'
+      : currentState === "Active" ? 'blueviolet'
+        : 'gray';
   return (
-    <Box sx={{ my: 4 }}>
+    <Box sx={{ my: 1 }}>
       <Card sx={{ border: `2px solid ${color}` }}>
         <CardContent>
-          <Typography variant="h6" sx={{ my: 2, color: color }}>
+          <Typography variant="h6" sx={{ color: color }}>
             State: {stateEnum[state]}
           </Typography>
-          <Typography variant="h6" sx={{ my: 2 }}>
-            Proposed By: {proposer}
+          <Typography variant="h6" sx={{ my: 1 }}>
+            {description}
           </Typography>
-          <Typography>
+          {/* <Typography>
             ID: {proposalId}
-          </Typography>
+          </Typography> */}
           <Typography>
             Changing Contract: {targets}
           </Typography>
           <Typography>
-            {description}
+            Proposed By: {proposer}
           </Typography>
         </CardContent>
         <CardActions>
