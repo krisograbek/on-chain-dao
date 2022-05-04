@@ -19,6 +19,10 @@ export const propose = async (functionToCall: string, args: any[], proposalDescr
     functionToCall,
     args
   );
+
+  console.log(`Encoded function call: ${encodedFunctionCall}`)
+
+  console.log(`Decoded data ${box.interface.decodeFunctionData("store", encodedFunctionCall)}`)
   console.log(`Proposing ${functionToCall} on ${box.address} with ${args}.`);
   console.log(`Description ${proposalDescription}.`);
 
