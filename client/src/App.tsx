@@ -1,15 +1,16 @@
+import Box from '@mui/material/Box';
 import React, { useEffect, useState } from 'react';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import './App.css';
+import { Route, Routes } from "react-router-dom";
+import { EventEmitter } from 'stream';
 import Web3 from 'web3';
 
-import { boxAbi, boxAddress, governorAbi, governorAddress } from './utils/constants';
-import Proposals from './components/Proposals/Proposals';
+import './App.css';
+import Home from './components/Home';
 import Navbar from './components/Navbar';
-import ProposalForm from './components/Proposals/ProposalForm';
-import { EventEmitter } from 'stream';
+import ProposalPage from './components/Proposals/ProposalPage';
+import Proposals from './components/Proposals/Proposals';
+import { boxAbi, boxAddress, governorAbi, governorAddress } from './utils/constants';
+
 
 // using local node
 const web3 = new Web3("ws://localhost:8545")
@@ -22,39 +23,57 @@ type FormData = {
   description: string
 }
 
+type EventReturn = {
+  // event: string,
+  // address: string,
+  returnValues: any
+}
+
+
 function App() {
-  const [newGreetings, setNewGreetings] = useState("");
-  const [greetings, setGreetings] = useState("")
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
 
   // console.log(governorContract)
 
+  const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
+    const getProposals = events.map(async (event: EventReturn) => {
+      const { proposer, proposalId, calldatas, description, targets } = event.returnValues;
+      const state = await governorContract.methods.state(proposalId).call();
+      const proposal: Proposal = { proposer, proposalId, calldatas, description, targets, state };
+      console.log("Proposal", proposal);
+      return proposal;
+    });
+    const allProposals = await Promise.all(getProposals);
+    return allProposals;
+  }
+
   useEffect(() => {
+    console.log("How often am I called?")
     // subscribe to the ProposalCreated event 
     governorContract.events.ProposalCreated({
       fromBlock: "latest"
     })
       // update state after the new event
-      .on('data', (event: EventEmitter) => {
+      .on('data', async (event: EventEmitter) => {
         // TODO: Function to update state
-        console.log("This should fire on Proposal Created", event);
-      })
-  })
+        console.log("This should fire on Proposal Created");
+        await getProposals()
+      });
+    // get proposals on the initial render
+    const update = async () => {
+      await getProposals();
+    }
+    update();
+  }, []);
 
-  const getEvents = async () => {
+  const getProposals = async () => {
     try {
-      const events = await governorContract.getPastEvents('ProposalCreated', {
+      const events: Array<EventReturn> = await governorContract.getPastEvents('ProposalCreated', {
         fromBlock: 0,
         toBlock: 'latest'
       });
-      const getProposals = events.map(async (event) => {
-        const { proposer, proposalId, calldatas, description, targets } = event.returnValues;
-        const state = await governorContract.methods.state(proposalId).call();
-        const proposal: Proposal = { proposer, proposalId, calldatas, description, targets, state };
-        console.log("Proposal", proposal);
-        return proposal;
-      });
-      const allProposals = await Promise.all(getProposals);
+      // const allProposals = await Promise.all(updateProposals(events));
+      const allProposals = await updateProposals(events);
       setProposals(allProposals);
       console.log("Events", events);
     } catch (error) {
@@ -81,30 +100,15 @@ function App() {
     ).send({ from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' })
   }
 
-  const greetMe = async () => {
-    const greetMsg = await governorContract.methods.greet().call();
-    return greetMsg;
-  }
-
-  const updateGreets = async () => {
-    const greetMsg = await governorContract.methods.setGreeting(newGreetings).send({ from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' })
-    setGreetings(await greetMe())
-  }
-
   return (
-    <Container maxWidth='lg'>
-      <Grid container className="App" spacing={2}>
-        <Grid item sm={12}>
-          <Navbar onClick={() => getEvents()} />
-        </Grid>
-        <Grid item sm={12} md={8}>
-          <Proposals proposals={proposals} />
-        </Grid>
-        <Grid item sm={12} md={4}>
-          <ProposalForm handleSubmit={handleSubmit} />
-        </Grid>
-      </Grid>
-    </Container>
+    <Box>
+      <Navbar onClick={() => getProposals()} />
+      <Routes>
+        <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
+        <Route path="proposals" element={<Proposals proposals={proposals} />} />
+        <Route path="proposals/:proposalId" element={<ProposalPage />} />
+      </Routes>
+    </Box>
   );
 }
 
