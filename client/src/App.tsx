@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import { Route, Routes } from "react-router-dom";
+import { EventEmitter } from 'stream';
 import Web3 from 'web3';
 
-import { boxAbi, boxAddress, governorAbi, governorAddress } from './utils/constants';
-import Proposals from './components/Proposals/Proposals';
-import Navbar from './components/Navbar';
-import ProposalForm from './components/Proposals/ProposalForm';
-import { EventEmitter } from 'stream';
+import './App.css';
 import Home from './components/Home';
+import Navbar from './components/Navbar';
+import { boxAbi, boxAddress, governorAbi, governorAddress } from './utils/constants';
+
 
 // using local node
 const web3 = new Web3("ws://localhost:8545")
@@ -104,7 +101,9 @@ function App() {
   return (
     <Box>
       <Navbar onClick={() => getProposals()} />
-      <Home proposals={proposals} handleSubmit={handleSubmit} />
+      <Routes>
+        <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
+      </Routes>
     </Box>
   );
 }
