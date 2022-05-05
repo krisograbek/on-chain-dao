@@ -7,6 +7,8 @@ import Web3 from 'web3';
 import './App.css';
 import Home from './components/Home';
 import Navbar from './components/Navbar';
+import ProposalPage from './components/Proposals/ProposalPage';
+import Proposals from './components/Proposals/Proposals';
 import { boxAbi, boxAddress, governorAbi, governorAddress } from './utils/constants';
 
 
@@ -103,6 +105,8 @@ function App() {
       <Navbar onClick={() => getProposals()} />
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
+        <Route path="proposals" element={<Proposals proposals={proposals} />} />
+        <Route path="proposals/:proposalId" element={<ProposalPage />} />
       </Routes>
     </Box>
   );

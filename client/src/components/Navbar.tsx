@@ -13,9 +13,12 @@ const Navbar = ({ onClick }: Props) => {
   return (
     <AppBar position='static' color='inherit' sx={{ py: 1 }}>
       <Toolbar>
-        <Typography variant='h4'>
+        <Button size='large'>
           <Link to="/">Home</Link>
-        </Typography>
+        </Button>
+        <Button size='large'>
+          <Link to="/proposals">Proposals</Link>
+        </Button>
         {/* <Button variant="contained" onClick={onClick}>
           Get Proposals
         </Button> */}
