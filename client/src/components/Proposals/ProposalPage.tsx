@@ -87,7 +87,7 @@ const ProposalPage = ({ proposals, vote }: Props) => {
               </Grid>
               <Grid item sm={12}>
                 {votingWay < 3 && (
-                  <Button variant='contained' onClick={e => vote(proposer, votingWay, reason)}>
+                  <Button variant='contained' onClick={e => vote(proposalId, votingWay, reason)}>
                     Vote
                   </Button>
                 )}

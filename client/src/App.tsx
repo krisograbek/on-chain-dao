@@ -66,8 +66,13 @@ function App() {
     update();
   }, []);
 
-  const vote = (proposer: string, votingWay: number, reason: string) => {
-    console.log("Voting", proposer, votingWay, reason)
+  const vote = async (proposalId: string, votingWay: number, reason: string) => {
+    console.log("Voting", votingWay, reason)
+    await governorContract.methods.castVoteWithReason(
+      proposalId,
+      votingWay,
+      reason
+    ).send({ from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' })
   }
 
   const getProposals = async () => {
