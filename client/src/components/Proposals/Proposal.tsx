@@ -5,7 +5,7 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
-import { stateEnum } from '../../utils/mapState';
+import { getThemeColor, stateEnum } from '../../utils/helpers';
 import { Link } from 'react-router-dom';
 
 type Props = {
@@ -15,10 +15,7 @@ type Props = {
 const Proposal = ({ proposal }: Props) => {
   const { proposer, proposalId, calldatas, description, targets, state } = proposal;
   const currentState = stateEnum[state];
-  const color = ["Succeeded", "Executed"].includes(currentState) ? 'green'
-    : ["Defeated", "Canceled", "Expired"].includes(currentState) ? 'red'
-      : currentState === "Active" ? 'blueviolet'
-        : 'gray';
+  const color = getThemeColor(currentState);
   return (
     <Box sx={{ my: 1 }} >
       <Card sx={{ border: `2px solid ${color}` }}>
@@ -32,16 +29,16 @@ const Proposal = ({ proposal }: Props) => {
           {/* <Typography>
             ID: {proposalId}
           </Typography> */}
-          <Typography>
+          {/* <Typography>
             Changing Contract: {targets}
-          </Typography>
+          </Typography> */}
           <Typography>
             Proposed By: {proposer}
           </Typography>
         </CardContent>
         <CardActions>
           <Link to={`/proposals/${proposalId}`} >
-            <Button >
+            <Button size='large' >
               DETAILS
             </Button>
           </Link>
