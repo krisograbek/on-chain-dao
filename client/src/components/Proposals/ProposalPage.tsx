@@ -36,18 +36,27 @@ const ProposalPage = ({ proposals, vote }: Props) => {
   const color = getThemeColor(stateEnum[state]);
   return (
     <Container maxWidth='lg' sx={{ mt: 15 }}>
-      <Grid container spacing={4} justifyContent="space-between">
-        <Grid item sm={3} textAlign="center">
-          <Typography variant='h5' color={color} sx={{ border: 1, p: 1 }}>
+      <Grid container justifyContent="space-between" alignContent="center">
+        <Grid item sm={3} textAlign="center" sx={{ color: color }}>
+          <Typography className={`${stateEnum[state] === "Active" ? "activeBox" : ""}`} variant='h5' sx={{ p: 1, border: 1 }}>
+            {/* Todo replace box with better looking and accurate Icons */}
+            <Box sx={{
+              mx: 2,
+              borderRadius: '50%',
+              backgroundColor: color,
+              width: 20,
+              height: 20,
+              display: 'inline-block',
+            }} />
             {stateEnum[state]}
           </Typography>
         </Grid>
-        <Grid item sm={9} textAlign="right">
-          <Typography>
+        <Grid item sm={9} textAlign="right" >
+          <Typography sx={{ p: 2 }}>
             Proposed By: {shortenAddress(proposer)}
           </Typography>
         </Grid>
-        <Grid item sm={12}>
+        <Grid item sm={12} sx={{ py: 5 }}>
           {stateEnum[state] === "Active" && (
             <Grid container >
               <Grid item sm={12} md={8}>
@@ -95,8 +104,18 @@ const ProposalPage = ({ proposals, vote }: Props) => {
             </Grid>
           )}
         </Grid>
+        <Grid item>
+          <Box>
+            <Typography variant="h5">
+              Details
+            </Typography>
+            <Typography variant="h6">
+              {description}
+            </Typography>
+          </Box>
+        </Grid>
       </Grid>
-    </Container>
+    </Container >
 
   )
 }

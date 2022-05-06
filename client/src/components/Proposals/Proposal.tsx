@@ -29,9 +29,9 @@ const Proposal = ({ proposal }: Props) => {
           {/* <Typography>
             ID: {proposalId}
           </Typography> */}
-          <Typography>
+          {/* <Typography>
             Changing Contract: {targets}
-          </Typography>
+          </Typography> */}
           <Typography>
             Proposed By: {proposer}
           </Typography>
