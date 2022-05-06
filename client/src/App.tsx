@@ -66,6 +66,10 @@ function App() {
     update();
   }, []);
 
+  const vote = (proposer: string, votingWay: number, reason: string) => {
+    console.log("Voting", proposer, votingWay, reason)
+  }
+
   const getProposals = async () => {
     try {
       const events: Array<EventReturn> = await governorContract.getPastEvents('ProposalCreated', {
@@ -105,7 +109,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />
-        <Route path="proposals/:proposalId" element={<ProposalPage proposals={proposals} />} />
+        <Route path="proposals/:proposalId" element={<ProposalPage proposals={proposals} vote={vote} />} />
       </Routes>
     </Box>
   );
