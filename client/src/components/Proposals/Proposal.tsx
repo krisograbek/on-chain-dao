@@ -5,7 +5,7 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
-import { stateEnum } from '../../utils/mapState';
+import { stateEnum } from '../../utils/helpers';
 import { Link } from 'react-router-dom';
 
 type Props = {
@@ -41,7 +41,7 @@ const Proposal = ({ proposal }: Props) => {
         </CardContent>
         <CardActions>
           <Link to={`/proposals/${proposalId}`} >
-            <Button >
+            <Button size='large' >
               DETAILS
             </Button>
           </Link>

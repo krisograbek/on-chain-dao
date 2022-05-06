@@ -1,14 +1,39 @@
 import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { shortenAddress } from '../../utils/helpers';
 
-const ProposalPage = () => {
+type Props = {
+  proposals: Array<Proposal>
+}
+
+const ProposalPage = ({ proposals }: Props) => {
   const params = useParams();
-  console.log("I am a proposal page")
+  // find the proposal with proposal ID from the URL params
+  const proposal = proposals.find(p => p.proposalId === params.proposalId);
+  console.log("I am a proposal page", proposal);
+
+  // Proposal may be undefined
+  if (!proposal) {
+    return (
+      <div>No such proposal</div>
+    )
+  }
+
+  const { proposer, proposalId, description, state, targets } = proposal;
   return (
-    <Box sx={{ my: 1 }}>
-      {params.proposalId}
-    </Box>
+    <Container maxWidth='lg' sx={{ mt: 5 }}>
+      <Box sx={{ my: 1 }}>
+        {proposalId}
+      </Box>
+      <Typography>
+        Proposed By: {shortenAddress(proposer)}
+      </Typography>
+    </Container>
 
   )
 }
