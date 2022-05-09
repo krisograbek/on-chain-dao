@@ -15,10 +15,12 @@ import { shortenAddress, stateEnum, getThemeColor } from '../../utils/helpers';
 
 type Props = {
   proposals: Array<Proposal>,
-  vote: Function
+  vote: Function,
+  queue: Function,
+  execute: Function,
 }
 
-const ProposalPage = ({ proposals, vote }: Props) => {
+const ProposalPage = ({ proposals, vote, queue, execute }: Props) => {
   const params = useParams();
   // find the proposal with proposal ID from the URL params
   const proposal = proposals.find(p => p.proposalId === params.proposalId);
@@ -56,6 +58,7 @@ const ProposalPage = ({ proposals, vote }: Props) => {
             Proposed By: {shortenAddress(proposer)}
           </Typography>
         </Grid>
+        {/* Active State */}
         <Grid item sm={12} sx={{ py: 5 }}>
           {stateEnum[state] === "Active" && (
             <Grid container >
@@ -79,7 +82,6 @@ const ProposalPage = ({ proposals, vote }: Props) => {
               </Grid>
               <Grid item sm={12} md={8}>
                 <Box>
-
                   <TextField
                     sx={{ my: 3 }}
                     name='reason'
@@ -101,6 +103,20 @@ const ProposalPage = ({ proposals, vote }: Props) => {
                   </Button>
                 )}
               </Grid>
+            </Grid>
+          )}
+        </Grid>
+        <Grid item sm={12} sx={{ py: 5 }}>
+          {stateEnum[state] === "Succeeded" && (
+            <Grid container>
+              <Button onClick={e => queue()}>Queue</Button>
+            </Grid>
+          )}
+        </Grid>
+        <Grid item sm={12} sx={{ py: 5 }}>
+          {stateEnum[state] === "Queued" && (
+            <Grid container>
+              <Button onClick={e => execute()}>Execute</Button>
             </Grid>
           )}
         </Grid>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Route, Routes } from "react-router-dom";
 import { EventEmitter } from 'stream';
 import Web3 from 'web3';
+import { utils } from 'ethers';
 
 import './App.css';
 import Home from './components/Home';
@@ -28,6 +29,20 @@ type EventReturn = {
   // However, calling updateProposals() failed because types didn't match
   // type 'any' is a workaround, not the real solution
   returnValues: any
+}
+
+const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
+  // name may also be a parameter of this function
+  name: 'store',
+  type: 'function',
+  inputs: [{
+    type: 'uint256',
+    name: 'newValue'
+  }]
+}, [`${data}`]);
+
+const hashDescription = (text: string) => {
+  return utils.keccak256(utils.toUtf8Bytes(text));
 }
 
 function App() {
@@ -81,6 +96,38 @@ function App() {
     ).send({ from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' })
   }
 
+  const queue = async () => {
+    const encodedData = encodeData(21);
+    console.log(encodedData);
+    const descriptionHash = hashDescription("We need to change it to 21!");
+    await governorContract.methods.queue(
+      [boxAddress],
+      [0],
+      [encodedData],
+      descriptionHash
+    ).send({ from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' })
+    // console.log("Updating Box...")
+    // const newBoxValue = await boxContract.methods.retrieve().call();
+    // setBoxValue(newBoxValue);
+    // console.log("Updated Box!")
+  }
+
+  const execute = async () => {
+    const encodedData = encodeData(21);
+    console.log(encodedData);
+    const descriptionHash = hashDescription("We need to change it to 21!");
+    await governorContract.methods.execute(
+      [boxAddress],
+      [0],
+      [encodedData],
+      descriptionHash
+    ).send({ from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' })
+    console.log("Updating Box...")
+    const newBoxValue = await boxContract.methods.retrieve().call();
+    setBoxValue(newBoxValue);
+    console.log("Updated Box!")
+  }
+
   const getProposals = async () => {
     try {
       const events: Array<EventReturn> = await governorContract.getPastEvents('ProposalCreated', {
@@ -97,14 +144,7 @@ function App() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
     e.preventDefault();
-    const encodedData = web3.eth.abi.encodeFunctionCall({
-      name: 'store',
-      type: 'function',
-      inputs: [{
-        type: 'uint256',
-        name: 'newValue'
-      }]
-    }, [`${formData.value}`]);
+    const encodedData = encodeData(formData.value);
 
     await governorContract.methods.propose(
       [boxAddress],
@@ -120,7 +160,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />
-        <Route path="proposals/:proposalId" element={<ProposalPage proposals={proposals} vote={vote} />} />
+        <Route path="proposals/:proposalId" element={<ProposalPage proposals={proposals} vote={vote} queue={queue} execute={execute} />} />
       </Routes>
     </Box>
   );
