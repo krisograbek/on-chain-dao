@@ -32,6 +32,7 @@ type EventReturn = {
 
 function App() {
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
+  const [boxValue, setBoxValue] = useState<number>(0);
 
   const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
     const getProposals = events.map(async (event: EventReturn) => {
@@ -64,6 +65,11 @@ function App() {
       await getProposals();
     }
     update();
+    const getBoxValue = async () => {
+      const initialBoxValue = await boxContract.methods.retrieve().call();
+      setBoxValue(initialBoxValue);
+    }
+    getBoxValue();
   }, []);
 
   const vote = async (proposalId: string, votingWay: number, reason: string) => {
@@ -110,7 +116,7 @@ function App() {
 
   return (
     <Box>
-      <Navbar onClick={() => getProposals()} />
+      <Navbar boxValue={boxValue} onClick={() => getProposals()} />
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />

@@ -6,10 +6,11 @@ import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
 
 type Props = {
+  boxValue: number,
   onClick: React.MouseEventHandler
 }
 
-const Navbar = ({ onClick }: Props) => {
+const Navbar = ({ boxValue, onClick }: Props) => {
   return (
     <AppBar position='static' color='inherit' sx={{ py: 1 }}>
       <Toolbar>
@@ -22,6 +23,7 @@ const Navbar = ({ onClick }: Props) => {
         {/* <Button variant="contained" onClick={onClick}>
           Get Proposals
         </Button> */}
+        <Typography>Box value: {boxValue}</Typography>
       </Toolbar>
     </AppBar>
   )

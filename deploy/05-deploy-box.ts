@@ -14,14 +14,17 @@ const deployBox: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const box = await deploy("Box", {
     from: deployer,
-    args: [],
+    args: [13],
     log: true
   });
 
   log(`Deployed Box at ${box.address}`);
 
-  const timeLock = await ethers.getContract("TimeLock");
   const boxContract = await ethers.getContractAt("Box", box.address);
+  const boxInitialValue = await boxContract.retrieve();
+  log(`Box Initial Value ${boxInitialValue}`);
+
+  const timeLock = await ethers.getContract("TimeLock");
 
   // transferOwnership comes from Ownable
   const transferOwnerTx = await boxContract.transferOwnership(timeLock.address);
