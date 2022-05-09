@@ -24,6 +24,12 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 0,
+    },
+    secondAccount: {
+      default: 1
+    },
+    thirdAccount: {
+      default: 2
     }
   }
 }
