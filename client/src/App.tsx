@@ -20,7 +20,13 @@ const boxContract = new web3.eth.Contract(boxAbi, boxAddress);
 
 // const currentAccount = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
 // const currentAccount = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
-const currentAccount = "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc";
+// const currentAccount = "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc";
+
+const accounts = [
+  "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+  "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+]
 
 // 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc
 
@@ -54,6 +60,9 @@ const hashDescription = (text: string) => {
 function App() {
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
   const [boxValue, setBoxValue] = useState<number>(0);
+  const [accountId, setAccountId] = useState<number>(0);
+
+  // console.log("Current account", accounts[accountId]);
 
   const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
     const getProposals = events.map(async (event: EventReturn) => {
@@ -99,7 +108,7 @@ function App() {
       proposalId,
       votingWay,
       reason
-    ).send({ from: currentAccount })
+    ).send({ from: accounts[accountId] })
   }
 
   const queue = async () => {
@@ -111,7 +120,7 @@ function App() {
       [0],
       [encodedData],
       descriptionHash
-    ).send({ from: currentAccount })
+    ).send({ from: accounts[accountId] })
     // console.log("Updating Box...")
     // const newBoxValue = await boxContract.methods.retrieve().call();
     // setBoxValue(newBoxValue);
@@ -127,7 +136,7 @@ function App() {
       [0],
       [encodedData],
       descriptionHash
-    ).send({ from: currentAccount })
+    ).send({ from: accounts[accountId] })
     console.log("Updating Box...")
     const newBoxValue = await boxContract.methods.retrieve().call();
     setBoxValue(newBoxValue);
@@ -157,12 +166,12 @@ function App() {
       [0],
       [encodedData],
       formData.description
-    ).send({ from: currentAccount })
+    ).send({ from: accounts[accountId] })
   }
 
   return (
     <Box>
-      <Navbar boxValue={boxValue} onClick={() => getProposals()} />
+      <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} />
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />

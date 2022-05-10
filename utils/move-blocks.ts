@@ -12,7 +12,7 @@ export const moveBlocks = async (amount: number) => {
   console.log(`Moved ${amount} blocks.`)
 }
 
-moveBlocks(3)
+moveBlocks(2)
   .then(() => process.exit(0))
   .catch((error) => {
     console.log(error);
