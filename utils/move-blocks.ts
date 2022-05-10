@@ -1,5 +1,4 @@
 import { network } from "hardhat";
-import { argv } from "process";
 
 export const moveBlocks = async (amount: number) => {
 
@@ -13,7 +12,7 @@ export const moveBlocks = async (amount: number) => {
   console.log(`Moved ${amount} blocks.`)
 }
 
-moveBlocks(1)
+moveBlocks(2)
   .then(() => process.exit(0))
   .catch((error) => {
     console.log(error);

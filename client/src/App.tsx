@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Route, Routes } from "react-router-dom";
 import { EventEmitter } from 'stream';
 import Web3 from 'web3';
+import { utils } from 'ethers';
 
 import './App.css';
 import Home from './components/Home';
@@ -17,6 +18,18 @@ const web3 = new Web3("ws://localhost:8545")
 const governorContract = new web3.eth.Contract(governorAbi, governorAddress);
 const boxContract = new web3.eth.Contract(boxAbi, boxAddress);
 
+// const currentAccount = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+// const currentAccount = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
+// const currentAccount = "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc";
+
+const accounts = [
+  "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+  "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+]
+
+// 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc
+
 type FormData = {
   func: string,
   value: number,
@@ -30,8 +43,26 @@ type EventReturn = {
   returnValues: any
 }
 
+const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
+  // name may also be a parameter of this function
+  name: 'store',
+  type: 'function',
+  inputs: [{
+    type: 'uint256',
+    name: 'newValue'
+  }]
+}, [`${data}`]);
+
+const hashDescription = (text: string) => {
+  return utils.keccak256(utils.toUtf8Bytes(text));
+}
+
 function App() {
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
+  const [boxValue, setBoxValue] = useState<number>(0);
+  const [accountId, setAccountId] = useState<number>(0);
+
+  // console.log("Current account", accounts[accountId]);
 
   const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
     const getProposals = events.map(async (event: EventReturn) => {
@@ -64,6 +95,11 @@ function App() {
       await getProposals();
     }
     update();
+    const getBoxValue = async () => {
+      const initialBoxValue = await boxContract.methods.retrieve().call();
+      setBoxValue(initialBoxValue);
+    }
+    getBoxValue();
   }, []);
 
   const vote = async (proposalId: string, votingWay: number, reason: string) => {
@@ -72,7 +108,39 @@ function App() {
       proposalId,
       votingWay,
       reason
-    ).send({ from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' })
+    ).send({ from: accounts[accountId] })
+  }
+
+  const queue = async () => {
+    const encodedData = encodeData(21);
+    console.log(encodedData);
+    const descriptionHash = hashDescription("We need to change it to 21!");
+    await governorContract.methods.queue(
+      [boxAddress],
+      [0],
+      [encodedData],
+      descriptionHash
+    ).send({ from: accounts[accountId] })
+    // console.log("Updating Box...")
+    // const newBoxValue = await boxContract.methods.retrieve().call();
+    // setBoxValue(newBoxValue);
+    // console.log("Updated Box!")
+  }
+
+  const execute = async () => {
+    const encodedData = encodeData(21);
+    console.log(encodedData);
+    const descriptionHash = hashDescription("We need to change it to 21!");
+    await governorContract.methods.execute(
+      [boxAddress],
+      [0],
+      [encodedData],
+      descriptionHash
+    ).send({ from: accounts[accountId] })
+    console.log("Updating Box...")
+    const newBoxValue = await boxContract.methods.retrieve().call();
+    setBoxValue(newBoxValue);
+    console.log("Updated Box!")
   }
 
   const getProposals = async () => {
@@ -91,30 +159,23 @@ function App() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
     e.preventDefault();
-    const encodedData = web3.eth.abi.encodeFunctionCall({
-      name: 'store',
-      type: 'function',
-      inputs: [{
-        type: 'uint256',
-        name: 'newValue'
-      }]
-    }, [`${formData.value}`]);
+    const encodedData = encodeData(formData.value);
 
     await governorContract.methods.propose(
       [boxAddress],
       [0],
       [encodedData],
       formData.description
-    ).send({ from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266' })
+    ).send({ from: accounts[accountId] })
   }
 
   return (
     <Box>
-      <Navbar onClick={() => getProposals()} />
+      <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} />
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />
-        <Route path="proposals/:proposalId" element={<ProposalPage proposals={proposals} vote={vote} />} />
+        <Route path="proposals/:proposalId" element={<ProposalPage proposals={proposals} vote={vote} queue={queue} execute={execute} />} />
       </Routes>
     </Box>
   );
