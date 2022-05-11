@@ -28,8 +28,6 @@ const accounts = [
   "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
 ]
 
-// 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc
-
 type FormData = {
   func: string,
   value: number,

@@ -1,17 +1,12 @@
 import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-import TextField from '@mui/material/TextField';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { shortenAddress, stateEnum, getThemeColor } from '../../utils/helpers';
+import { getThemeColor, shortenAddress, stateEnum } from '../../utils/helpers';
+import Vote from './Vote';
 
 type Props = {
   proposals: Array<Proposal>,
@@ -59,53 +54,9 @@ const ProposalPage = ({ proposals, vote, queue, execute }: Props) => {
           </Typography>
         </Grid>
         {/* Active State */}
-        <Grid item sm={12} sx={{ py: 5 }}>
-          {stateEnum[state] === "Active" && (
-            <Grid container >
-              <Grid item sm={12} md={8}>
-                <Typography variant='h3' color={color}>Voting is now Active</Typography>
-
-                <FormControl>
-                  <FormLabel id="demo-controlled-radio-buttons-group">Select option</FormLabel>
-                  <RadioGroup
-                    aria-labelledby="demo-controlled-radio-buttons-group"
-                    name="controlled-radio-buttons-group"
-                    row
-                    value={votingWay}
-                    onChange={(e) => setVotingWay(parseInt(e.target.value))}
-                  >
-                    <FormControlLabel value={0} control={<Radio />} label="Against" />
-                    <FormControlLabel value={1} control={<Radio />} label="For" />
-                    <FormControlLabel value={2} control={<Radio />} label="Abstain" />
-                  </RadioGroup>
-                </FormControl>
-              </Grid>
-              <Grid item sm={12} md={8}>
-                <Box>
-                  <TextField
-                    sx={{ my: 3 }}
-                    name='reason'
-                    multiline
-                    variant='outlined'
-                    label='Explain your decision (Optional)'
-                    fullWidth
-                    disabled={votingWay > 2}
-                    rows={3}
-                    value={reason}
-                    onChange={e => setReason(e.target.value)}
-                  />
-                </Box>
-              </Grid>
-              <Grid item sm={12}>
-                {votingWay < 3 && (
-                  <Button variant='contained' onClick={e => vote(proposalId, votingWay, reason)}>
-                    Vote
-                  </Button>
-                )}
-              </Grid>
-            </Grid>
-          )}
-        </Grid>
+        {stateEnum[state] === "Active" && (
+          <Vote color={color} votingWay={votingWay} setVotingWay={setVotingWay} reason={reason} setReason={setReason} vote={vote} proposalId={proposalId} />
+        )}
         <Grid item sm={12} sx={{ py: 5 }}>
           {stateEnum[state] === "Succeeded" && (
             <Grid container>
@@ -137,3 +88,4 @@ const ProposalPage = ({ proposals, vote, queue, execute }: Props) => {
 }
 
 export default ProposalPage;
+
