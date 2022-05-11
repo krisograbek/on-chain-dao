@@ -100,6 +100,20 @@ function App() {
     getBoxValue();
   }, []);
 
+  const getProposals = async () => {
+    try {
+      const events: Array<EventReturn> = await governorContract.getPastEvents('ProposalCreated', {
+        fromBlock: 0,
+        toBlock: 'latest'
+      });
+      const allProposals = await updateProposals(events);
+      setProposals(allProposals);
+      // console.log("Events", events);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const vote = async (proposalId: string, votingWay: number, reason: string) => {
     console.log("Voting", votingWay, reason)
     await governorContract.methods.castVoteWithReason(
@@ -119,10 +133,6 @@ function App() {
       [encodedData],
       descriptionHash
     ).send({ from: accounts[accountId] })
-    // console.log("Updating Box...")
-    // const newBoxValue = await boxContract.methods.retrieve().call();
-    // setBoxValue(newBoxValue);
-    // console.log("Updated Box!")
   }
 
   const execute = async () => {
@@ -141,20 +151,6 @@ function App() {
     console.log("Updated Box!")
   }
 
-  const getProposals = async () => {
-    try {
-      const events: Array<EventReturn> = await governorContract.getPastEvents('ProposalCreated', {
-        fromBlock: 0,
-        toBlock: 'latest'
-      });
-      const allProposals = await updateProposals(events);
-      setProposals(allProposals);
-      console.log("Events", events);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
     e.preventDefault();
     const encodedData = encodeData(formData.value);
@@ -167,13 +163,26 @@ function App() {
     ).send({ from: accounts[accountId] })
   }
 
+  const proposalElement = () => {
+    return (
+      <ProposalPage
+        proposals={proposals}
+        vote={vote}
+        queue={queue}
+        execute={execute}
+        governorContract={governorContract}
+        user={accounts[accountId]}
+      />
+    )
+  }
+
   return (
     <Box>
       <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} />
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />
-        <Route path="proposals/:proposalId" element={<ProposalPage proposals={proposals} vote={vote} queue={queue} execute={execute} />} />
+        <Route path="proposals/:proposalId" element={proposalElement()} />
       </Routes>
     </Box>
   );
