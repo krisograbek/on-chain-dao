@@ -14,13 +14,33 @@ const deployGovernanceToken: DeployFunction = async (hre: HardhatRuntimeEnvironm
     from: deployer,
     args: [],
     log: true
-  })
+  });
+
+  const tokenContract = await ethers.getContract("GovernanceToken");
+
+  // log(tokenContract)
+  log("Connecting...")
+  tokenContract.connect(secondAccount);
+  // log(tokenContract)
+
   log(`Deployed govenrance token to ${governanceToken.address}`)
 
+  await delegate(tokenContract, deployer);
+  log("Delegated!")
+
+  // await delegate(tokenContract, secondAccount);
+  // log("Delegated!")
+
+  // await delegate(tokenContract, thirdAccount);
+  // log("Delegated!")
+
+  log("Checking votes before transfer...");
+  await getVotes(governanceToken.address, deployer);
+  // transfering to other accounts
   await transfer(governanceToken.address, secondAccount, BigNumber.from("50000000000000000000000")); //50k tokens => 5%
   log("Transfered!")
-  await delegate(governanceToken.address, thirdAccount);
-  log("Delegated!")
+  await transfer(governanceToken.address, thirdAccount, BigNumber.from("50000000000000000000000")); //50k tokens => 5%
+  log("Transfered!")
   log("Checking votes...");
   await getVotes(governanceToken.address, deployer);
   await getVotes(governanceToken.address, secondAccount);
@@ -32,8 +52,8 @@ const deployGovernanceToken: DeployFunction = async (hre: HardhatRuntimeEnvironm
 
 }
 
-const delegate = async (governanceTokenAddress: string, delegatedAccount: string) => {
-  const governanceToken = await ethers.getContractAt("GovernanceToken", governanceTokenAddress); // name, address
+const delegate = async (governanceToken: any, delegatedAccount: string) => {
+  // const governanceToken = await ethers.getContractAt("GovernanceToken", governanceTokenAddress); // name, address
   // delegate comes from ERC20Votes
   // under the hood it calls the _moveVotingPower()
   const tx = await governanceToken.delegate(delegatedAccount);
@@ -50,13 +70,13 @@ const transfer = async (governanceTokenAddress: string, to: string, amount: BigN
   console.log(`Balance of ${to}: ${await governanceToken.balanceOf(to)}`);
 }
 
-const getVotes = async (governanceTokenAddress: string, account: string) => {
+export const getVotes = async (governanceTokenAddress: string, account: string) => {
   const governanceToken = await ethers.getContractAt("GovernanceToken", governanceTokenAddress); // name, address
   // transfer tokens to the given account
   console.log(`Votes of ${account}: ${await governanceToken.getVotes(account)}`);
 }
 
-const getDelegates = async (governanceTokenAddress: string, account: string) => {
+export const getDelegates = async (governanceTokenAddress: string, account: string) => {
   const governanceToken = await ethers.getContractAt("GovernanceToken", governanceTokenAddress); // name, address
   // transfer tokens to the given account
   console.log(`Votes of ${account} are delegated to ${await governanceToken.delegates(account)}`);
