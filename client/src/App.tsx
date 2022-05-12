@@ -197,7 +197,7 @@ function App() {
         execute={execute}
         governorContract={governorContract}
         user={accounts[accountId]}
-      // getAvailableTokens={getAvailableTokens}
+        availableTokens={availableTokens}
       />
     )
   }

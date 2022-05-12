@@ -3,11 +3,10 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import { BigNumber, ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'stream';
-import { bigNumberToFloat, getThemeColor, shortenAddress, stateEnum } from '../../utils/helpers';
+import { bigNumberToFloat, getThemeColor, shortenAddress, stateEnum, voteWayToString } from '../../utils/helpers';
 import Vote from './Vote';
 
 type Props = {
@@ -17,7 +16,7 @@ type Props = {
   queue: Function,
   execute: Function,
   governorContract: any,
-  // getAvailableTokens: Function,
+  availableTokens: number,
 }
 
 type VoteReturnValues = {
@@ -39,7 +38,7 @@ type VotingResults = {
   // voters: Array<string>
 }
 
-const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user }: Props) => {
+const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user, availableTokens }: Props) => {
   const params = useParams();
   // find the proposal with proposal ID from the URL params
   const proposal = proposals.find(p => p.proposalId === params.proposalId);
@@ -128,6 +127,7 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
 
   const { proposer, proposalId, description, state, targets } = proposal;
   const color = getThemeColor(stateEnum[state]);
+
   return (
     <Container maxWidth='lg' sx={{ mt: 15 }}>
       <Grid container justifyContent="space-between" alignContent="center">
@@ -160,7 +160,7 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
           </Grid>
         )}
         {/* Active State */}
-        {(stateEnum[state] === "Active" && !voters.includes(user)) ? (
+        {(availableTokens > 0) ? ((stateEnum[state] === "Active" && !voters.includes(user)) ? (
           <Vote
             color={color}
             votingWay={votingWay}
@@ -173,7 +173,11 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
           />
         ) : (stateEnum[state] === "Active" && voters.includes(user)) && (
           <Grid item sm={12} sx={{ py: 5 }}>
-            <Typography>You have already voted {usersVoting.support} with {bigNumberToFloat(usersVoting.weight)} tokens </Typography>
+            <Typography>You have already voted {voteWayToString[usersVoting.support]} with {bigNumberToFloat(usersVoting.weight)} tokens </Typography>
+          </Grid>
+        )) : (
+          <Grid item sm={12} sx={{ py: 5 }}>
+            <Typography>You need tokens to vote </Typography>
           </Grid>
         )}
         {stateEnum[state] === "Succeeded" && (

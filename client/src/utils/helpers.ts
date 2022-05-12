@@ -25,3 +25,9 @@ export const bigNumberToFloat = (input: String): number => {
   const converted = parseFloat(ethers.utils.formatEther(BigNumber.from(input)));
   return converted;
 }
+
+export const voteWayToString: { [key: string]: string } = {
+  "0": "Against",
+  "1": "For",
+  "2": "Abstain",
+}
