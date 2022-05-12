@@ -13,3 +13,11 @@ declare interface Proposal {
   targets: Array<string>;
   state: number;
 }
+
+declare interface VoteInterface {
+  proposalId: string;
+  support: string;
+  voter: string;
+  weight: string;
+  reason: string;
+}

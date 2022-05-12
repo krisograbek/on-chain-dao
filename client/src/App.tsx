@@ -10,17 +10,15 @@ import Home from './components/Home';
 import Navbar from './components/Navbar';
 import ProposalPage from './components/Proposals/ProposalPage';
 import Proposals from './components/Proposals/Proposals';
-import { boxAbi, boxAddress, governorAbi, governorAddress } from './utils/constants';
+import { boxAbi, boxAddress, governorAbi, governorAddress, tokenAbi, tokenAddress } from './utils/constants';
+import { bigNumberToFloat } from './utils/helpers';
 
 
 // using local node
 const web3 = new Web3("ws://localhost:8545")
 const governorContract = new web3.eth.Contract(governorAbi, governorAddress);
 const boxContract = new web3.eth.Contract(boxAbi, boxAddress);
-
-// const currentAccount = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
-// const currentAccount = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
-// const currentAccount = "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc";
+const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
 
 const accounts = [
   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
@@ -59,6 +57,7 @@ function App() {
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
   const [boxValue, setBoxValue] = useState<number>(0);
   const [accountId, setAccountId] = useState<number>(0);
+  const [availableTokens, setAvailableTokens] = useState<number>(0);
 
   // console.log("Current account", accounts[accountId]);
 
@@ -77,7 +76,6 @@ function App() {
   }
 
   useEffect(() => {
-    console.log("How often am I called?")
     // subscribe to the ProposalCreated event 
     governorContract.events.ProposalCreated({
       fromBlock: "latest"
@@ -98,7 +96,42 @@ function App() {
       setBoxValue(initialBoxValue);
     }
     getBoxValue();
+    const updateAvailableTokens = async () => {
+      try {
+        const tokensAvailable = await getAvailableTokens(accounts[accountId]);
+        console.log(tokensAvailable);
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    updateAvailableTokens();
   }, []);
+
+  useEffect(() => {
+    const updateAvailableTokens = async () => {
+      try {
+        const tokensAvailable = await getAvailableTokens(accounts[accountId]);
+        setAvailableTokens(bigNumberToFloat(tokensAvailable));
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    updateAvailableTokens();
+  }, [accountId])
+
+  const getProposals = async () => {
+    try {
+      const events: Array<EventReturn> = await governorContract.getPastEvents('ProposalCreated', {
+        fromBlock: 0,
+        toBlock: 'latest'
+      });
+      const allProposals = await updateProposals(events);
+      setProposals(allProposals);
+      // console.log("Events", events);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const vote = async (proposalId: string, votingWay: number, reason: string) => {
     console.log("Voting", votingWay, reason)
@@ -119,10 +152,6 @@ function App() {
       [encodedData],
       descriptionHash
     ).send({ from: accounts[accountId] })
-    // console.log("Updating Box...")
-    // const newBoxValue = await boxContract.methods.retrieve().call();
-    // setBoxValue(newBoxValue);
-    // console.log("Updated Box!")
   }
 
   const execute = async () => {
@@ -141,18 +170,10 @@ function App() {
     console.log("Updated Box!")
   }
 
-  const getProposals = async () => {
-    try {
-      const events: Array<EventReturn> = await governorContract.getPastEvents('ProposalCreated', {
-        fromBlock: 0,
-        toBlock: 'latest'
-      });
-      const allProposals = await updateProposals(events);
-      setProposals(allProposals);
-      console.log("Events", events);
-    } catch (error) {
-      console.log(error);
-    }
+  const getAvailableTokens = async (user: string) => {
+    console.log("Show ME!")
+    const tokensAvailable = await tokenContract.methods.getVotes(user,).call();
+    return tokensAvailable;
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
@@ -167,13 +188,27 @@ function App() {
     ).send({ from: accounts[accountId] })
   }
 
+  const proposalElement = () => {
+    return (
+      <ProposalPage
+        proposals={proposals}
+        vote={vote}
+        queue={queue}
+        execute={execute}
+        governorContract={governorContract}
+        user={accounts[accountId]}
+        availableTokens={availableTokens}
+      />
+    )
+  }
+
   return (
     <Box>
-      <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} />
+      <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} availableTokens={availableTokens} />
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />
-        <Route path="proposals/:proposalId" element={<ProposalPage proposals={proposals} vote={vote} queue={queue} execute={execute} />} />
+        <Route path="proposals/:proposalId" element={proposalElement()} />
       </Routes>
     </Box>
   );

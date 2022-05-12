@@ -1,14 +1,14 @@
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import React, { useState } from 'react';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel';
+import Grid from '@mui/material/Grid';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import React from 'react';
 
 
 type Props = {
@@ -18,11 +18,11 @@ type Props = {
   reason: string,
   setReason: React.Dispatch<React.SetStateAction<string>>,
   vote: Function,
-  proposalId: string
+  proposalId: string,
+  governorContract: any
 }
 
-const Vote = ({ color, votingWay, setVotingWay, reason, setReason, vote, proposalId }: Props) => {
-
+const Vote = ({ color, votingWay, setVotingWay, reason, setReason, vote, proposalId, governorContract }: Props) => {
 
 
   return <Grid item sm={12} sx={{ py: 5 }}>
