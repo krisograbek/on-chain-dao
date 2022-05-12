@@ -12,7 +12,7 @@ import Vote from './Vote';
 
 type Props = {
   proposals: Array<Proposal>,
-  user: string,
+  user: String,
   vote: Function,
   queue: Function,
   execute: Function,
@@ -52,7 +52,9 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
   // votes for this proposal taken from VoteCast event in the Governor.sol
   const [votes, setVotes] = useState<Array<VoteInterface>>([]);
   // voting results for this proposal
-  const [votingResults, setvotingResults] = useState<VotingResults>({ for: 0, against: 0, abstain: 0 });
+  const [votingResults, setVotingResults] = useState<VotingResults>({ for: 0, against: 0, abstain: 0 });
+  const [hasVoted, setHasVoted] = useState<Boolean>(false);
+  const [voters, setVoters] = useState<Array<String>>([]);
 
   useEffect(() => {
     governorContract.events.VoteCast({
@@ -81,7 +83,7 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
     console.log("For: ", totalFor, typeof totalFor);
     console.log("Against: ", totalAgainst, typeof totalAgainst);
     console.log("Abstain: ", totalAbstain);
-    setvotingResults({ for: totalFor, against: totalAgainst, abstain: totalAbstain })
+    setVotingResults({ for: totalFor, against: totalAgainst, abstain: totalAbstain });
   }, [votes]);
 
   const updateVotes = async (events: Array<VoteEventReturn>): Promise<Array<VoteInterface>> => {
@@ -96,6 +98,11 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
     return allVotes;
   }
 
+  // console.log("Voters", voters[0]);
+  // console.log("Userrs", user, voters.includes(user));
+  // console.log("Compare", user == voters[0].toLowerCase());
+  // console.log(["Banana", "Apple"].includes("Apple"))
+
   const getVotes = async () => {
     try {
       const events: Array<VoteEventReturn> = await governorContract.getPastEvents('VoteCast', {
@@ -104,7 +111,9 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
       });
       const allVotes = await updateVotes(events);
       const filteredVotes = allVotes.filter((vote: VoteInterface) => vote.proposalId === params.proposalId);
+      const currentVoters = filteredVotes.map((v) => v.voter.toLowerCase());
       setVotes(filteredVotes);
+      setVoters(currentVoters);
       console.log("Votes", filteredVotes);
     } catch (error) {
       console.log(error);
@@ -152,7 +161,7 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
           </Grid>
         )}
         {/* Active State */}
-        {stateEnum[state] === "Active" && (
+        {(stateEnum[state] === "Active" && !voters.includes(user)) ? (
           <Vote
             color={color}
             votingWay={votingWay}
@@ -163,6 +172,10 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
             proposalId={proposalId}
             governorContract={governorContract}
           />
+        ) : (stateEnum[state] === "Active" && voters.includes(user)) && (
+          <Grid item sm={12} sx={{ py: 5 }}>
+            <Typography>You have already voted </Typography>
+          </Grid>
         )}
         {stateEnum[state] === "Succeeded" && (
           <Grid item sm={12} sx={{ py: 5 }}>
