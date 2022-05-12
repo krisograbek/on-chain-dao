@@ -204,7 +204,7 @@ function App() {
 
   return (
     <Box>
-      <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} />
+      <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} availableTokens={availableTokens} />
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />

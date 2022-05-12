@@ -14,11 +14,11 @@ type Props = {
   boxValue: number,
   accounts: Array<string>,
   accountId: number,
-  // onClick: React.MouseEventHandler,
   setAccountId: Function,
+  availableTokens: number,
 }
 
-const Navbar = ({ boxValue, accounts, accountId, setAccountId }: Props) => {
+const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens }: Props) => {
 
   const handleAccountChange = (e: SelectChangeEvent<number>) => {
     setAccountId(e.target.value);
@@ -50,7 +50,7 @@ const Navbar = ({ boxValue, accounts, accountId, setAccountId }: Props) => {
             <MenuItem value={2}>{shortenAddress(accounts[2])}</MenuItem>
           </Select>
         </FormControl>
-
+        <Typography>You own {availableTokens} tokens </Typography>
       </Toolbar>
     </AppBar>
   )
