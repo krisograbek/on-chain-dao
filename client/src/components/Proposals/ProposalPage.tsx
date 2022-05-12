@@ -39,6 +39,7 @@ type VotingResults = {
 }
 
 const convertWeight = (weight: String): number => {
+  if (weight === "") return 0;
   const retWeight = parseFloat(ethers.utils.formatEther(BigNumber.from(weight)));
   return retWeight;
 }
@@ -53,8 +54,8 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
   const [votes, setVotes] = useState<Array<VoteInterface>>([]);
   // voting results for this proposal
   const [votingResults, setVotingResults] = useState<VotingResults>({ for: 0, against: 0, abstain: 0 });
-  const [hasVoted, setHasVoted] = useState<Boolean>(false);
   const [voters, setVoters] = useState<Array<String>>([]);
+  const [usersVoting, setUsersVoting] = useState<Pick<VoteReturnValues, 'weight' | 'support'>>({ weight: "", support: "" });
 
   useEffect(() => {
     governorContract.events.VoteCast({
@@ -70,11 +71,25 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
       await getVotes();
     }
     update();
+    if (voters.includes(user)) {
+      const usersVote = votes.find((v) => v.voter.toLowerCase() === user);
+      if (usersVote) {
+        setUsersVoting({ weight: usersVote.weight, support: usersVote.support });
+      }
+    }
   }, []);
 
   useEffect(() => {
     console.log("Hey, user changed")
-  }, [user]);
+    if (voters.includes(user)) {
+      const usersVote = votes.find((v) => v.voter.toLowerCase() === user);
+      if (usersVote) {
+        setUsersVoting({ weight: usersVote.weight, support: usersVote.support });
+      }
+    }
+  }, [user, voters]);
+
+  console.log("UsersVoting", usersVoting)
 
   useEffect(() => {
     const totalAgainst = votes.filter((v) => v.support === "0").map((v) => convertWeight(v.weight)).reduce((prev, curr) => prev + curr, 0);
@@ -174,7 +189,7 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
           />
         ) : (stateEnum[state] === "Active" && voters.includes(user)) && (
           <Grid item sm={12} sx={{ py: 5 }}>
-            <Typography>You have already voted </Typography>
+            <Typography>You have already voted {usersVoting.support} with {convertWeight(usersVoting.weight)} tokens </Typography>
           </Grid>
         )}
         {stateEnum[state] === "Succeeded" && (

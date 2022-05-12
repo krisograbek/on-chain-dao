@@ -15,9 +15,9 @@ declare interface Proposal {
 }
 
 declare interface VoteInterface {
-  proposalId: String;
-  support: String;
-  voter: String;
-  weight: String;
-  reason: String;
+  proposalId: string;
+  support: string;
+  voter: string;
+  weight: string;
+  reason: string;
 }
