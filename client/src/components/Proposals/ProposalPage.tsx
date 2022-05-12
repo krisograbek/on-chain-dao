@@ -7,7 +7,7 @@ import { BigNumber, ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'stream';
-import { getThemeColor, shortenAddress, stateEnum } from '../../utils/helpers';
+import { bigNumberToFloat, getThemeColor, shortenAddress, stateEnum } from '../../utils/helpers';
 import Vote from './Vote';
 
 type Props = {
@@ -16,7 +16,8 @@ type Props = {
   vote: Function,
   queue: Function,
   execute: Function,
-  governorContract: any
+  governorContract: any,
+  // getAvailableTokens: Function,
 }
 
 type VoteReturnValues = {
@@ -38,12 +39,6 @@ type VotingResults = {
   // voters: Array<string>
 }
 
-const convertWeight = (weight: String): number => {
-  if (weight === "") return 0;
-  const retWeight = parseFloat(ethers.utils.formatEther(BigNumber.from(weight)));
-  return retWeight;
-}
-
 const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user }: Props) => {
   const params = useParams();
   // find the proposal with proposal ID from the URL params
@@ -62,7 +57,6 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
       fromBlock: 0
     })
       .on('data', async (event: EventEmitter) => {
-        // console.log("You Just Voted");
         await getVotes();
       });
 
@@ -71,16 +65,11 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
       await getVotes();
     }
     update();
-    if (voters.includes(user)) {
-      const usersVote = votes.find((v) => v.voter.toLowerCase() === user);
-      if (usersVote) {
-        setUsersVoting({ weight: usersVote.weight, support: usersVote.support });
-      }
-    }
   }, []);
 
   useEffect(() => {
-    console.log("Hey, user changed")
+    // Whenever we change user or the list of voters changes,
+    // we want to know if current user has already voted.
     if (voters.includes(user)) {
       const usersVote = votes.find((v) => v.voter.toLowerCase() === user);
       if (usersVote) {
@@ -89,12 +78,12 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
     }
   }, [user, voters]);
 
-  console.log("UsersVoting", usersVoting)
-
   useEffect(() => {
-    const totalAgainst = votes.filter((v) => v.support === "0").map((v) => convertWeight(v.weight)).reduce((prev, curr) => prev + curr, 0);
-    const totalFor = votes.filter((v) => v.support === "1").map((v) => convertWeight(v.weight)).reduce((prev, curr) => prev + curr, 0);
-    const totalAbstain = votes.filter((v) => v.support === "2").map((v) => convertWeight(v.weight)).reduce((prev, curr) => prev + curr, 0);
+    // TODO: move it to a single function?
+    // ["0", "1", "2"].map((answer) => getTotal(votes, answer))
+    const totalAgainst = votes.filter((v) => v.support === "0").map((v) => bigNumberToFloat(v.weight)).reduce((prev, curr) => prev + curr, 0);
+    const totalFor = votes.filter((v) => v.support === "1").map((v) => bigNumberToFloat(v.weight)).reduce((prev, curr) => prev + curr, 0);
+    const totalAbstain = votes.filter((v) => v.support === "2").map((v) => bigNumberToFloat(v.weight)).reduce((prev, curr) => prev + curr, 0);
     console.log("For: ", totalFor, typeof totalFor);
     console.log("Against: ", totalAgainst, typeof totalAgainst);
     console.log("Abstain: ", totalAbstain);
@@ -112,11 +101,6 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
     const allVotes = await Promise.all(getVotesFromEvents);
     return allVotes;
   }
-
-  // console.log("Voters", voters[0]);
-  // console.log("Userrs", user, voters.includes(user));
-  // console.log("Compare", user == voters[0].toLowerCase());
-  // console.log(["Banana", "Apple"].includes("Apple"))
 
   const getVotes = async () => {
     try {
@@ -189,7 +173,7 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user 
           />
         ) : (stateEnum[state] === "Active" && voters.includes(user)) && (
           <Grid item sm={12} sx={{ py: 5 }}>
-            <Typography>You have already voted {usersVoting.support} with {convertWeight(usersVoting.weight)} tokens </Typography>
+            <Typography>You have already voted {usersVoting.support} with {bigNumberToFloat(usersVoting.weight)} tokens </Typography>
           </Grid>
         )}
         {stateEnum[state] === "Succeeded" && (

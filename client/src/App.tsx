@@ -10,17 +10,15 @@ import Home from './components/Home';
 import Navbar from './components/Navbar';
 import ProposalPage from './components/Proposals/ProposalPage';
 import Proposals from './components/Proposals/Proposals';
-import { boxAbi, boxAddress, governorAbi, governorAddress } from './utils/constants';
+import { boxAbi, boxAddress, governorAbi, governorAddress, tokenAbi, tokenAddress } from './utils/constants';
+import { bigNumberToFloat } from './utils/helpers';
 
 
 // using local node
 const web3 = new Web3("ws://localhost:8545")
 const governorContract = new web3.eth.Contract(governorAbi, governorAddress);
 const boxContract = new web3.eth.Contract(boxAbi, boxAddress);
-
-// const currentAccount = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
-// const currentAccount = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
-// const currentAccount = "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc";
+const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
 
 const accounts = [
   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
@@ -59,6 +57,7 @@ function App() {
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
   const [boxValue, setBoxValue] = useState<number>(0);
   const [accountId, setAccountId] = useState<number>(0);
+  const [availableTokens, setAvailableTokens] = useState<number>(0);
 
   // console.log("Current account", accounts[accountId]);
 
@@ -97,7 +96,28 @@ function App() {
       setBoxValue(initialBoxValue);
     }
     getBoxValue();
+    const updateAvailableTokens = async () => {
+      try {
+        const tokensAvailable = await getAvailableTokens(accounts[accountId]);
+        console.log(tokensAvailable);
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    updateAvailableTokens();
   }, []);
+
+  useEffect(() => {
+    const updateAvailableTokens = async () => {
+      try {
+        const tokensAvailable = await getAvailableTokens(accounts[accountId]);
+        setAvailableTokens(bigNumberToFloat(tokensAvailable));
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    updateAvailableTokens();
+  }, [accountId])
 
   const getProposals = async () => {
     try {
@@ -150,6 +170,12 @@ function App() {
     console.log("Updated Box!")
   }
 
+  const getAvailableTokens = async (user: string) => {
+    console.log("Show ME!")
+    const tokensAvailable = await tokenContract.methods.getVotes(user,).call();
+    return tokensAvailable;
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
     e.preventDefault();
     const encodedData = encodeData(formData.value);
@@ -171,6 +197,7 @@ function App() {
         execute={execute}
         governorContract={governorContract}
         user={accounts[accountId]}
+      // getAvailableTokens={getAvailableTokens}
       />
     )
   }
