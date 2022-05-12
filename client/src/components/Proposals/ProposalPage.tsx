@@ -3,6 +3,7 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import { BigNumber, ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'stream';
@@ -27,21 +28,31 @@ type VoteReturnValues = {
 }
 
 type VoteEventReturn = {
-  // returnValues should be of type Proposal from types/proposal.d.ts
-  // However, calling updateProposals() failed because types didn't match
-  // type 'any' is a workaround, not the real solution
   returnValues: VoteReturnValues
 }
 
+type VotingResults = {
+  for: number,
+  against: number,
+  abstain: number,
+  // voters: Array<string>
+}
 
-const ProposalPage = ({ proposals, vote, queue, execute, governorContract }: Props) => {
+const convertWeight = (weight: String): number => {
+  const retWeight = parseFloat(ethers.utils.formatEther(BigNumber.from(weight)));
+  return retWeight;
+}
+
+const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user }: Props) => {
   const params = useParams();
   // find the proposal with proposal ID from the URL params
   const proposal = proposals.find(p => p.proposalId === params.proposalId);
-  const [votingWay, setVotingWay] = useState<number>(3);
+  const [votingWay, setVotingWay] = useState<number>(3); // initial value is 3 so it's neither Against, For, nor Abstain
   const [reason, setReason] = useState<string>("");
+  // votes for this proposal taken from VoteCast event in the Governor.sol
   const [votes, setVotes] = useState<Array<VoteInterface>>([]);
-
+  // voting results for this proposal
+  const [votingResults, setvotingResults] = useState<VotingResults>({ for: 0, against: 0, abstain: 0 });
 
   useEffect(() => {
     governorContract.events.VoteCast({
@@ -59,15 +70,29 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract }: Pro
     update();
   }, []);
 
+  useEffect(() => {
+    console.log("Hey, user changed")
+  }, [user]);
+
+  useEffect(() => {
+    const totalAgainst = votes.filter((v) => v.support === "0").map((v) => convertWeight(v.weight)).reduce((prev, curr) => prev + curr, 0);
+    const totalFor = votes.filter((v) => v.support === "1").map((v) => convertWeight(v.weight)).reduce((prev, curr) => prev + curr, 0);
+    const totalAbstain = votes.filter((v) => v.support === "2").map((v) => convertWeight(v.weight)).reduce((prev, curr) => prev + curr, 0);
+    console.log("For: ", totalFor, typeof totalFor);
+    console.log("Against: ", totalAgainst, typeof totalAgainst);
+    console.log("Abstain: ", totalAbstain);
+    setvotingResults({ for: totalFor, against: totalAgainst, abstain: totalAbstain })
+  }, [votes]);
+
   const updateVotes = async (events: Array<VoteEventReturn>): Promise<Array<VoteInterface>> => {
-    const getVotes = events.map(async (event: VoteEventReturn) => {
+    const getVotesFromEvents = events.map(async (event: VoteEventReturn) => {
       const { proposalId, support, voter, weight, reason } = event.returnValues;
       const vote: VoteInterface = { proposalId, support, voter, weight, reason };
       return vote;
     });
     // events.map calls an async function
     // Promise.all() is required when we await an Array mapping
-    const allVotes = await Promise.all(getVotes);
+    const allVotes = await Promise.all(getVotesFromEvents);
     return allVotes;
   }
 
@@ -86,19 +111,12 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract }: Pro
     }
   }
 
-  // const getVotes = async() => {
-  //   try {
-  //     const events: Array<VoteEventReturn>
-  //   }
-  // }
-
   // Find may return undefined
   if (!proposal) {
     return (
       <div>Proposal with id ${params.proposalId} doesn't exist</div>
     )
   }
-
 
   const { proposer, proposalId, description, state, targets } = proposal;
   const color = getThemeColor(stateEnum[state]);
@@ -124,6 +142,15 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract }: Pro
             Proposed By: {shortenAddress(proposer)}
           </Typography>
         </Grid>
+        {stateEnum[state] !== "Pending" && (
+          <Grid item sm={12} sx={{ py: 3 }}>
+            <Typography variant='h4'>Voting Results</Typography>
+            <Typography variant='h6'>Total - {votingResults.for + votingResults.against + votingResults.abstain}</Typography>
+            <Typography variant='h6' color="green">For - {votingResults.for}</Typography>
+            <Typography variant='h6' color="red">Against - {votingResults.against}</Typography>
+            <Typography variant='h6' color="gray">Abstain - {votingResults.abstain}</Typography>
+          </Grid>
+        )}
         {/* Active State */}
         {stateEnum[state] === "Active" && (
           <Vote
@@ -137,20 +164,20 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract }: Pro
             governorContract={governorContract}
           />
         )}
-        <Grid item sm={12} sx={{ py: 5 }}>
-          {stateEnum[state] === "Succeeded" && (
+        {stateEnum[state] === "Succeeded" && (
+          <Grid item sm={12} sx={{ py: 5 }}>
             <Grid container>
               <Button onClick={e => queue()}>Queue</Button>
             </Grid>
-          )}
-        </Grid>
-        <Grid item sm={12} sx={{ py: 5 }}>
-          {stateEnum[state] === "Queued" && (
+          </Grid>
+        )}
+        {stateEnum[state] === "Queued" && (
+          <Grid item sm={12} sx={{ py: 5 }}>
             <Grid container>
               <Button onClick={e => execute()}>Execute</Button>
             </Grid>
-          )}
-        </Grid>
+          </Grid>
+        )}
         <Grid item>
           <Box>
             <Typography variant="h5">

@@ -77,7 +77,6 @@ function App() {
   }
 
   useEffect(() => {
-    console.log("How often am I called?")
     // subscribe to the ProposalCreated event 
     governorContract.events.ProposalCreated({
       fromBlock: "latest"
