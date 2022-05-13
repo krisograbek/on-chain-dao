@@ -21,3 +21,13 @@ declare interface VoteInterface {
   weight: string;
   reason: string;
 }
+
+interface Window {
+  ethereum: any
+}
+
+// interface Contract {
+//   methods: any;
+//   events: any;
+//   getPastEvents: Function;
+// }
