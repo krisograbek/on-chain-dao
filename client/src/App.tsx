@@ -1,8 +1,9 @@
 import Box from '@mui/material/Box';
-import React, { useEffect, useState } from 'react';
+import React, { MouseEventHandler, useEffect, useState } from 'react';
 import { Route, Routes } from "react-router-dom";
 import { EventEmitter } from 'stream';
 import Web3 from 'web3';
+import { Contract } from 'web3-eth-contract';
 import { utils } from 'ethers';
 
 import './App.css';
@@ -10,15 +11,31 @@ import Home from './components/Home';
 import Navbar from './components/Navbar';
 import ProposalPage from './components/Proposals/ProposalPage';
 import Proposals from './components/Proposals/Proposals';
-import { boxAbi, boxAddress, governorAbi, governorAddress, tokenAbi, tokenAddress } from './utils/constants';
-import { bigNumberToFloat } from './utils/helpers';
+import { boxAbi, boxAddress, boxAddressRB, governorAbi, governorAddress, governorAddressRB, tokenAbi, tokenAddress, tokenAddressRB } from './utils/constants';
+import { bigNumberToFloat, hashDescription } from './utils/helpers';
 
 
-// using local node
-const web3 = new Web3("ws://localhost:8545")
-const governorContract = new web3.eth.Contract(governorAbi, governorAddress);
-const boxContract = new web3.eth.Contract(boxAbi, boxAddress);
-const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
+let web3: Web3;
+let governorContract: Contract;
+let boxContract: Contract;
+let tokenContract: Contract;
+
+if (window.ethereum) {
+  console.log("Metamask detected")
+  web3 = new Web3(window.ethereum);
+  // const web3 = new Web3(window.ethereum)
+  governorContract = new web3.eth.Contract(governorAbi, governorAddressRB);
+  boxContract = new web3.eth.Contract(boxAbi, boxAddressRB);
+  tokenContract = new web3.eth.Contract(tokenAbi, tokenAddressRB);
+} else {
+  // using local node
+  web3 = new Web3("ws://localhost:8545");
+  governorContract = new web3.eth.Contract(governorAbi, governorAddress);
+  boxContract = new web3.eth.Contract(boxAbi, boxAddress);
+  tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
+
+}
+
 
 const accounts = [
   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
@@ -49,17 +66,12 @@ const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
   }]
 }, [`${data}`]);
 
-const hashDescription = (text: string) => {
-  return utils.keccak256(utils.toUtf8Bytes(text));
-}
-
 function App() {
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
   const [boxValue, setBoxValue] = useState<number>(0);
   const [accountId, setAccountId] = useState<number>(0);
   const [availableTokens, setAvailableTokens] = useState<number>(0);
-
-  // console.log("Current account", accounts[accountId]);
+  const [user, setUser] = useState<string>("");
 
   const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
     const getProposals = events.map(async (event: EventReturn) => {
@@ -96,27 +108,27 @@ function App() {
       setBoxValue(initialBoxValue);
     }
     getBoxValue();
-    const updateAvailableTokens = async () => {
-      try {
-        const tokensAvailable = await getAvailableTokens(accounts[accountId]);
-        console.log(tokensAvailable);
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    updateAvailableTokens();
+    // const updateAvailableTokens = async () => {
+    //   try {
+    //     const tokensAvailable = await getAvailableTokens(accounts[accountId]);
+    //     console.log(tokensAvailable);
+    //   } catch (error) {
+    //     console.log(error)
+    //   }
+    // }
+    // updateAvailableTokens();
   }, []);
 
   useEffect(() => {
-    const updateAvailableTokens = async () => {
-      try {
-        const tokensAvailable = await getAvailableTokens(accounts[accountId]);
-        setAvailableTokens(bigNumberToFloat(tokensAvailable));
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    updateAvailableTokens();
+    // const updateAvailableTokens = async () => {
+    //   try {
+    //     const tokensAvailable = await getAvailableTokens(accounts[accountId]);
+    //     setAvailableTokens(bigNumberToFloat(tokensAvailable));
+    //   } catch (error) {
+    //     console.log(error)
+    //   }
+    // }
+    // updateAvailableTokens();
   }, [accountId])
 
   const getProposals = async () => {
@@ -170,10 +182,15 @@ function App() {
     console.log("Updated Box!")
   }
 
-  const getAvailableTokens = async (user: string) => {
+  const getAvailableTokens = async (currentUser: string) => {
     console.log("Show ME!")
-    const tokensAvailable = await tokenContract.methods.getVotes(user,).call();
+    const tokensAvailable = await tokenContract.methods.getVotes(currentUser).call();
     return tokensAvailable;
+  }
+
+  const connectWallet = async () => {
+    const walletAccounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    console.log(walletAccounts);
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
@@ -204,7 +221,7 @@ function App() {
 
   return (
     <Box>
-      <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} availableTokens={availableTokens} />
+      <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} availableTokens={availableTokens} connectWallet={connectWallet} />
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />

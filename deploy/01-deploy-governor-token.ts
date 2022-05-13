@@ -34,21 +34,21 @@ const deployGovernanceToken: DeployFunction = async (hre: HardhatRuntimeEnvironm
   // await delegate(tokenContract, thirdAccount);
   // log("Delegated!")
 
-  log("Checking votes before transfer...");
-  await getVotes(governanceToken.address, deployer);
-  // transfering to other accounts
-  await transfer(governanceToken.address, secondAccount, BigNumber.from("50000000000000000000000")); //50k tokens => 5%
-  log("Transfered!")
-  await transfer(governanceToken.address, thirdAccount, BigNumber.from("50000000000000000000000")); //50k tokens => 5%
-  log("Transfered!")
-  log("Checking votes...");
-  await getVotes(governanceToken.address, deployer);
-  await getVotes(governanceToken.address, secondAccount);
-  await getVotes(governanceToken.address, thirdAccount);
-  log("Checking delegates...");
-  await getDelegates(governanceToken.address, deployer);
-  await getDelegates(governanceToken.address, secondAccount);
-  await getDelegates(governanceToken.address, thirdAccount);
+  // log("Checking votes before transfer...");
+  // await getVotes(governanceToken.address, deployer);
+  // // transfering to other accounts
+  // await transfer(governanceToken.address, secondAccount, BigNumber.from("50000000000000000000000")); //50k tokens => 5%
+  // log("Transfered!")
+  // await transfer(governanceToken.address, thirdAccount, BigNumber.from("50000000000000000000000")); //50k tokens => 5%
+  // log("Transfered!")
+  // log("Checking votes...");
+  // await getVotes(governanceToken.address, deployer);
+  // await getVotes(governanceToken.address, secondAccount);
+  // await getVotes(governanceToken.address, thirdAccount);
+  // log("Checking delegates...");
+  // await getDelegates(governanceToken.address, deployer);
+  // await getDelegates(governanceToken.address, secondAccount);
+  // await getDelegates(governanceToken.address, thirdAccount);
 
 }
 

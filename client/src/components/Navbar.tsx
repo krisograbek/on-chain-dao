@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { MouseEventHandler } from 'react'
 import AppBar from '@mui/material/AppBar';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
@@ -16,9 +16,10 @@ type Props = {
   accountId: number,
   setAccountId: Function,
   availableTokens: number,
+  connectWallet: MouseEventHandler<HTMLButtonElement>
 }
 
-const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens }: Props) => {
+const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, connectWallet }: Props) => {
 
   const handleAccountChange = (e: SelectChangeEvent<number>) => {
     setAccountId(e.target.value);
@@ -37,20 +38,25 @@ const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens }
           Get Proposals
         </Button> */}
         <Typography>Box value: {boxValue}</Typography>
-        <FormControl variant="standard" sx={{ px: 3, m: 1, minWidth: 120 }}>
-          <InputLabel id="demo-simple-select-filled-label" sx={{ px: 3, m: 1, minWidth: 120 }}>Account</InputLabel>
-          <Select
-            labelId="demo-simple-select-filled-label"
-            id="demo-simple-select-filled"
-            value={accountId}
-            onChange={e => handleAccountChange(e)}
-          >
-            <MenuItem value={0}>{shortenAddress(accounts[0])}</MenuItem>
-            <MenuItem value={1}>{shortenAddress(accounts[1])}</MenuItem>
-            <MenuItem value={2}>{shortenAddress(accounts[2])}</MenuItem>
-          </Select>
-        </FormControl>
-        <Typography>You own {availableTokens} tokens </Typography>
+        {!window.ethereum ? (
+
+          <FormControl variant="standard" sx={{ px: 3, m: 1, minWidth: 120 }}>
+            <InputLabel id="demo-simple-select-filled-label" sx={{ px: 3, m: 1, minWidth: 120 }}>Account</InputLabel>
+            <Select
+              labelId="demo-simple-select-filled-label"
+              id="demo-simple-select-filled"
+              value={accountId}
+              onChange={e => handleAccountChange(e)}
+            >
+              <MenuItem value={0}>{shortenAddress(accounts[0])}</MenuItem>
+              <MenuItem value={1}>{shortenAddress(accounts[1])}</MenuItem>
+              <MenuItem value={2}>{shortenAddress(accounts[2])}</MenuItem>
+            </Select>
+          </FormControl>
+        ) : (
+          <Button onClick={connectWallet}>Connect Wallet</Button>
+        )}
+        {/* <Typography>You own {availableTokens} tokens </Typography> */}
       </Toolbar>
     </AppBar>
   )

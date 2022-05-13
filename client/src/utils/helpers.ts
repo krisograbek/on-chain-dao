@@ -31,3 +31,9 @@ export const voteWayToString: { [key: string]: string } = {
   "1": "For",
   "2": "Abstain",
 }
+
+
+export const hashDescription = (text: string) => {
+  return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(text));
+}
+
