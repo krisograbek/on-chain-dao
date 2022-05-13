@@ -36,7 +36,6 @@ if (window.ethereum) {
 
 }
 
-
 const accounts = [
   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
   "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
@@ -191,6 +190,7 @@ function App() {
   const connectWallet = async () => {
     const walletAccounts = await window.ethereum.request({ method: "eth_requestAccounts" });
     console.log(walletAccounts);
+    setUser(walletAccounts[0]);
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
@@ -221,7 +221,15 @@ function App() {
 
   return (
     <Box>
-      <Navbar boxValue={boxValue} accounts={accounts} accountId={accountId} setAccountId={setAccountId} availableTokens={availableTokens} connectWallet={connectWallet} />
+      <Navbar
+        boxValue={boxValue}
+        accounts={accounts}
+        accountId={accountId}
+        setAccountId={setAccountId}
+        availableTokens={availableTokens}
+        connectWallet={connectWallet}
+        user={user}
+      />
       <Routes>
         <Route path="/" element={<Home proposals={proposals} handleSubmit={handleSubmit} />} />
         <Route path="proposals" element={<Proposals proposals={proposals} />} />

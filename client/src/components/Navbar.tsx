@@ -16,10 +16,11 @@ type Props = {
   accountId: number,
   setAccountId: Function,
   availableTokens: number,
-  connectWallet: MouseEventHandler<HTMLButtonElement>
+  connectWallet: MouseEventHandler<HTMLButtonElement>,
+  user: string
 }
 
-const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, connectWallet }: Props) => {
+const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, connectWallet, user }: Props) => {
 
   const handleAccountChange = (e: SelectChangeEvent<number>) => {
     setAccountId(e.target.value);
@@ -57,6 +58,7 @@ const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, 
           <Button onClick={connectWallet}>Connect Wallet</Button>
         )}
         {/* <Typography>You own {availableTokens} tokens </Typography> */}
+        <Typography>Account: {shortenAddress(user)}</Typography>
       </Toolbar>
     </AppBar>
   )
