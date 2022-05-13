@@ -40,7 +40,6 @@ const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, 
         </Button> */}
         <Typography>Box value: {boxValue}</Typography>
         {!window.ethereum ? (
-
           <FormControl variant="standard" sx={{ px: 3, m: 1, minWidth: 120 }}>
             <InputLabel id="demo-simple-select-filled-label" sx={{ px: 3, m: 1, minWidth: 120 }}>Account</InputLabel>
             <Select
@@ -57,7 +56,7 @@ const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, 
         ) : (
           <Button onClick={connectWallet}>Connect Wallet</Button>
         )}
-        {/* <Typography>You own {availableTokens} tokens </Typography> */}
+        <Typography sx={{ px: 2 }}>You own {availableTokens} tokens </Typography>
         <Typography>Account: {shortenAddress(user)}</Typography>
       </Toolbar>
     </AppBar>

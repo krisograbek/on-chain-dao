@@ -72,6 +72,8 @@ function App() {
   const [availableTokens, setAvailableTokens] = useState<number>(0);
   const [user, setUser] = useState<string>("");
 
+  // console.log(availableTokens)
+
   const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
     const getProposals = events.map(async (event: EventReturn) => {
       const { proposer, proposalId, calldatas, description, targets } = event.returnValues;
@@ -107,28 +109,31 @@ function App() {
       setBoxValue(initialBoxValue);
     }
     getBoxValue();
-    // const updateAvailableTokens = async () => {
-    //   try {
-    //     const tokensAvailable = await getAvailableTokens(accounts[accountId]);
-    //     console.log(tokensAvailable);
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // }
-    // updateAvailableTokens();
+    const updateAvailableTokens = async () => {
+      try {
+        if (user) {
+          const tokensAvailable = await getAvailableTokens(user);
+          console.log(tokensAvailable);
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    updateAvailableTokens();
   }, []);
 
   useEffect(() => {
-    // const updateAvailableTokens = async () => {
-    //   try {
-    //     const tokensAvailable = await getAvailableTokens(accounts[accountId]);
-    //     setAvailableTokens(bigNumberToFloat(tokensAvailable));
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // }
-    // updateAvailableTokens();
-  }, [accountId])
+    const updateAvailableTokens = async () => {
+      try {
+        const tokensAvailable = await getAvailableTokens(user);
+        console.log(tokensAvailable);
+        setAvailableTokens(bigNumberToFloat(tokensAvailable));
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    updateAvailableTokens();
+  }, [accountId, user])
 
   const getProposals = async () => {
     try {
