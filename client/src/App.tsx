@@ -202,7 +202,7 @@ function App() {
       [0],
       [encodedData],
       formData.description
-    ).send({ from: accounts[accountId] })
+    ).send({ from: user })
   }
 
   const proposalElement = () => {
