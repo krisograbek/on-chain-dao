@@ -16,3 +16,6 @@ export const tokenAbi: Array<any> = GovernanceToken.abi;
 // export const contractAddress = '0x051533e7E29192512D431D844300B95C33c40899';
 export const tokenAddress: string = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 export const tokenAddressRB: string = '0x09fE169935A77323ee35B2b6f8945563F50D7ae1';
+
+
+export const timelockAddressRB: string = '0xDcA5A24a7Ee159ec153f3599dd4E6d6E91E793b4';
