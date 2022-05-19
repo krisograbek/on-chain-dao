@@ -2,9 +2,6 @@ import Box from '@mui/material/Box';
 import React, { useEffect, useState, useContext } from 'react';
 import { Route, Routes } from "react-router-dom";
 import { EventEmitter } from 'stream';
-import Web3 from 'web3';
-import { Contract } from 'web3-eth-contract';
-import { utils } from 'ethers';
 
 import './App.css';
 import Home from './components/Home';
@@ -15,27 +12,6 @@ import { bigNumberToFloat, hashDescription } from './utils/helpers';
 import { AppContext } from './context/AppContext';
 import { boxAddressRB } from './utils/constants';
 
-
-// let web3: Web3;
-// let governorContract: Contract;
-// let boxContract: Contract;
-// let tokenContract: Contract;
-
-// if (window.ethereum) {
-//   console.log("Metamask detected")
-//   web3 = new Web3(window.ethereum);
-//   // const web3 = new Web3(window.ethereum)
-//   // governorContract = new web3.eth.Contract(governorAbi, governorAddressRB);
-//   boxContract = new web3.eth.Contract(boxAbi, boxAddressRB);
-//   tokenContract = new web3.eth.Contract(tokenAbi, tokenAddressRB);
-// } else {
-//   // using local node
-//   web3 = new Web3("ws://localhost:8545");
-//   // governorContract = new web3.eth.Contract(governorAbi, governorAddress);
-//   boxContract = new web3.eth.Contract(boxAbi, boxAddress);
-//   tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
-
-// }
 
 const accounts = [
   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
@@ -56,8 +32,6 @@ type EventReturn = {
   returnValues: any
 }
 
-
-
 function App() {
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
   const [boxValue, setBoxValue] = useState<number>(0);
@@ -66,9 +40,7 @@ function App() {
   const [user, setUser] = useState<string>("");
   const { userContext, governorContract, boxContract, tokenContract, web3 } = useContext(AppContext);
 
-
-
-
+  console.log("governor", governorContract)
 
   useEffect(() => {
     // subscribe to the ProposalCreated event
@@ -120,10 +92,10 @@ function App() {
     updateAvailableTokens();
   }, [accountId, user])
 
-  if (!web3) return <div>No web3 instance</div>
-  if (!governorContract) return <div>No governor Contract to work with</div>
-  if (!boxContract) return <div>No box Contract to work with</div>
-  if (!tokenContract) return <div>No token Contract to work with</div>
+  // if (!web3) return <div>No web3 instance</div>
+  // if (!governorContract) return <div>No governor Contract to work with</div>
+  // if (!boxContract) return <div>No box Contract to work with</div>
+  // if (!tokenContract) return <div>No token Contract to work with</div>
 
   const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
     // name may also be a parameter of this function

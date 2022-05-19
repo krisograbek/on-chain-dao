@@ -10,20 +10,40 @@ type AppContextProps = {
   governorContract: Contract,
   boxContract: Contract,
   tokenContract: Contract,
-  encodeData: Function
 }
 
-export const AppContext = React.createContext<Partial<AppContextProps>>({
+const web3 = new Web3(window.ethereum);
+
+
+const getGovernorContract = (web3: Web3) => {
+  const contract = new web3.eth.Contract(governorAbi, governorAddressRB);
+  return contract;
+}
+
+const getBoxContract = (web3: Web3) => {
+  const contract = new web3.eth.Contract(boxAbi, boxAddressRB);
+  return contract;
+}
+
+const getTokenContract = (web3: Web3) => {
+  const contract = new web3.eth.Contract(tokenAbi, tokenAddressRB);
+  return contract;
+}
+
+export const AppContext = React.createContext<AppContextProps>({
   userContext: "Default",
+  web3: web3,
+  governorContract: getGovernorContract(web3),
+  boxContract: getBoxContract(web3),
+  tokenContract: getTokenContract(web3),
 });
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const userContext = "Default User";
-  const web3 = new Web3(window.ethereum);
   // const web3 = new Web3(window.ethereum)
-  const governorContract = new web3.eth.Contract(governorAbi, governorAddressRB);
-  const boxContract = new web3.eth.Contract(boxAbi, boxAddressRB);
-  const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddressRB);
+  const governorContract = getGovernorContract(web3);
+  const boxContract = getBoxContract(web3);
+  const tokenContract = getTokenContract(web3);
 
   return (
     <AppContext.Provider value={{
