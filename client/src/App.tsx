@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box';
-import React, { MouseEventHandler, useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Route, Routes } from "react-router-dom";
 import { EventEmitter } from 'stream';
 import Web3 from 'web3';
@@ -11,30 +11,31 @@ import Home from './components/Home';
 import Navbar from './components/Navbar';
 import ProposalPage from './components/Proposals/ProposalPage';
 import Proposals from './components/Proposals/Proposals';
-import { boxAbi, boxAddress, boxAddressRB, governorAbi, governorAddress, governorAddressRB, tokenAbi, tokenAddress, tokenAddressRB } from './utils/constants';
 import { bigNumberToFloat, hashDescription } from './utils/helpers';
+import { AppContext } from './context/AppContext';
+import { boxAddressRB } from './utils/constants';
 
 
-let web3: Web3;
-let governorContract: Contract;
-let boxContract: Contract;
-let tokenContract: Contract;
+// let web3: Web3;
+// let governorContract: Contract;
+// let boxContract: Contract;
+// let tokenContract: Contract;
 
-if (window.ethereum) {
-  console.log("Metamask detected")
-  web3 = new Web3(window.ethereum);
-  // const web3 = new Web3(window.ethereum)
-  governorContract = new web3.eth.Contract(governorAbi, governorAddressRB);
-  boxContract = new web3.eth.Contract(boxAbi, boxAddressRB);
-  tokenContract = new web3.eth.Contract(tokenAbi, tokenAddressRB);
-} else {
-  // using local node
-  web3 = new Web3("ws://localhost:8545");
-  governorContract = new web3.eth.Contract(governorAbi, governorAddress);
-  boxContract = new web3.eth.Contract(boxAbi, boxAddress);
-  tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
+// if (window.ethereum) {
+//   console.log("Metamask detected")
+//   web3 = new Web3(window.ethereum);
+//   // const web3 = new Web3(window.ethereum)
+//   // governorContract = new web3.eth.Contract(governorAbi, governorAddressRB);
+//   boxContract = new web3.eth.Contract(boxAbi, boxAddressRB);
+//   tokenContract = new web3.eth.Contract(tokenAbi, tokenAddressRB);
+// } else {
+//   // using local node
+//   web3 = new Web3("ws://localhost:8545");
+//   // governorContract = new web3.eth.Contract(governorAbi, governorAddress);
+//   boxContract = new web3.eth.Contract(boxAbi, boxAddress);
+//   tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
 
-}
+// }
 
 const accounts = [
   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
@@ -55,15 +56,7 @@ type EventReturn = {
   returnValues: any
 }
 
-const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
-  // name may also be a parameter of this function
-  name: 'store',
-  type: 'function',
-  inputs: [{
-    type: 'uint256',
-    name: 'newValue'
-  }]
-}, [`${data}`]);
+
 
 function App() {
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
@@ -71,55 +64,47 @@ function App() {
   const [accountId, setAccountId] = useState<number>(0);
   const [availableTokens, setAvailableTokens] = useState<number>(0);
   const [user, setUser] = useState<string>("");
+  const { userContext, governorContract, boxContract, tokenContract, web3 } = useContext(AppContext);
 
-  // console.log(availableTokens)
 
-  const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
-    const getProposals = events.map(async (event: EventReturn) => {
-      const { proposer, proposalId, calldatas, description, targets } = event.returnValues;
-      const state = await governorContract.methods.state(proposalId).call();
-      const proposal: Proposal = { proposer, proposalId, calldatas, description, targets, state };
-      console.log("Proposal", proposal);
-      return proposal;
-    });
-    // events.map calls an async function
-    // Promise.all() is required when we await an Array mapping
-    const allProposals = await Promise.all(getProposals);
-    return allProposals;
-  }
+
+
 
   useEffect(() => {
-    // subscribe to the ProposalCreated event 
-    governorContract.events.ProposalCreated({
-      fromBlock: "latest"
-    })
-      // update state after the new event
-      .on('data', async (event: EventEmitter) => {
-        // TODO: Function to update state
-        console.log("This should fire on Proposal Created");
-        await getProposals()
-      });
-    // get proposals on the initial render
-    const update = async () => {
-      await getProposals();
-    }
-    update();
-    const getBoxValue = async () => {
-      const initialBoxValue = await boxContract.methods.retrieve().call();
-      setBoxValue(initialBoxValue);
-    }
-    getBoxValue();
-    const updateAvailableTokens = async () => {
-      try {
-        if (user) {
-          const tokensAvailable = await getAvailableTokens(user);
-          console.log(tokensAvailable);
-        }
-      } catch (error) {
-        console.log(error)
+    // subscribe to the ProposalCreated event
+    if (governorContract && boxContract) {
+
+      governorContract.events.ProposalCreated({
+        fromBlock: "latest"
+      })
+        // update state after the new event
+        .on('data', async (event: EventEmitter) => {
+          // TODO: Function to update state
+          console.log("This should fire on Proposal Created");
+          await getProposals()
+        });
+      // get proposals on the initial render
+      const update = async () => {
+        await getProposals();
       }
+      update();
+      const getBoxValue = async () => {
+        const initialBoxValue = await boxContract.methods.retrieve().call();
+        setBoxValue(initialBoxValue);
+      }
+      getBoxValue();
+      const updateAvailableTokens = async () => {
+        try {
+          if (user) {
+            const tokensAvailable = await getAvailableTokens(user);
+            console.log(tokensAvailable);
+          }
+        } catch (error) {
+          console.log(error)
+        }
+      }
+      updateAvailableTokens();
     }
-    updateAvailableTokens();
   }, []);
 
   useEffect(() => {
@@ -134,6 +119,35 @@ function App() {
     }
     updateAvailableTokens();
   }, [accountId, user])
+
+  if (!web3) return <div>No web3 instance</div>
+  if (!governorContract) return <div>No governor Contract to work with</div>
+  if (!boxContract) return <div>No box Contract to work with</div>
+  if (!tokenContract) return <div>No token Contract to work with</div>
+
+  const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
+    // name may also be a parameter of this function
+    name: 'store',
+    type: 'function',
+    inputs: [{
+      type: 'uint256',
+      name: 'newValue'
+    }]
+  }, [`${data}`]);
+
+  const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
+    const getProposals = events.map(async (event: EventReturn) => {
+      const { proposer, proposalId, calldatas, description, targets } = event.returnValues;
+      const state = await governorContract.methods.state(proposalId).call();
+      const proposal: Proposal = { proposer, proposalId, calldatas, description, targets, state };
+      console.log("Proposal", proposal);
+      return proposal;
+    });
+    // events.map calls an async function
+    // Promise.all() is required when we await an Array mapping
+    const allProposals = await Promise.all(getProposals);
+    return allProposals;
+  }
 
   const getProposals = async () => {
     try {
@@ -163,7 +177,7 @@ function App() {
     console.log(encodedData);
     const descriptionHash = hashDescription("We need to change it to 21!");
     await governorContract.methods.queue(
-      [boxAddress],
+      [boxAddressRB],
       [0],
       [encodedData],
       descriptionHash
@@ -175,7 +189,7 @@ function App() {
     console.log(encodedData);
     const descriptionHash = hashDescription("We need to change it to 21!");
     await governorContract.methods.execute(
-      [boxAddress],
+      [boxAddressRB],
       [0],
       [encodedData],
       descriptionHash
@@ -203,7 +217,7 @@ function App() {
     const encodedData = encodeData(formData.value);
 
     await governorContract.methods.propose(
-      [boxAddress],
+      [boxAddressRB],
       [0],
       [encodedData],
       formData.description
