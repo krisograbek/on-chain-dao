@@ -37,10 +37,7 @@ function App() {
   const [boxValue, setBoxValue] = useState<number>(0);
   const [accountId, setAccountId] = useState<number>(0);
   const [availableTokens, setAvailableTokens] = useState<number>(0);
-  const [user, setUser] = useState<string>("");
-  const { userContext, governorContract, boxContract, tokenContract, web3 } = useContext(AppContext);
-
-  console.log("governor", governorContract)
+  const { user, governorContract, boxContract, tokenContract, web3, connectWallet } = useContext(AppContext);
 
   useEffect(() => {
     // subscribe to the ProposalCreated event
@@ -92,11 +89,6 @@ function App() {
     updateAvailableTokens();
   }, [accountId, user])
 
-  // if (!web3) return <div>No web3 instance</div>
-  // if (!governorContract) return <div>No governor Contract to work with</div>
-  // if (!boxContract) return <div>No box Contract to work with</div>
-  // if (!tokenContract) return <div>No token Contract to work with</div>
-
   const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
     // name may also be a parameter of this function
     name: 'store',
@@ -141,7 +133,7 @@ function App() {
       proposalId,
       votingWay,
       reason
-    ).send({ from: accounts[accountId] })
+    ).send({ from: user })
   }
 
   const queue = async () => {
@@ -153,7 +145,7 @@ function App() {
       [0],
       [encodedData],
       descriptionHash
-    ).send({ from: accounts[accountId] })
+    ).send({ from: user })
   }
 
   const execute = async () => {
@@ -165,7 +157,7 @@ function App() {
       [0],
       [encodedData],
       descriptionHash
-    ).send({ from: accounts[accountId] })
+    ).send({ from: user })
     console.log("Updating Box...")
     const newBoxValue = await boxContract.methods.retrieve().call();
     setBoxValue(newBoxValue);
@@ -176,12 +168,6 @@ function App() {
     console.log("Show ME!")
     const tokensAvailable = await tokenContract.methods.getVotes(currentUser).call();
     return tokensAvailable;
-  }
-
-  const connectWallet = async () => {
-    const walletAccounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-    console.log(walletAccounts);
-    setUser(walletAccounts[0]);
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
@@ -204,7 +190,7 @@ function App() {
         queue={queue}
         execute={execute}
         governorContract={governorContract}
-        user={accounts[accountId]}
+        user={user}
         availableTokens={availableTokens}
       />
     )
