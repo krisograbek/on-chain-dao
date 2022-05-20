@@ -41,27 +41,26 @@ function App() {
 
   useEffect(() => {
     // subscribe to the ProposalCreated event
-    if (governorContract && boxContract) {
-
-      governorContract.events.ProposalCreated({
-        fromBlock: "latest"
-      })
-        // update state after the new event
-        .on('data', async (event: EventEmitter) => {
-          // TODO: Function to update state
-          console.log("This should fire on Proposal Created");
-          await getProposals()
-        });
-      // get proposals on the initial render
-      const update = async () => {
-        await getProposals();
-      }
-      update();
-      const getBoxValue = async () => {
-        const initialBoxValue = await boxContract.methods.retrieve().call();
-        setBoxValue(initialBoxValue);
-      }
-      getBoxValue();
+    governorContract.events.ProposalCreated({
+      fromBlock: "latest"
+    })
+      // update state after the new event
+      .on('data', async (event: EventEmitter) => {
+        // TODO: Function to update state
+        console.log("This should fire on Proposal Created");
+        await getProposals()
+      });
+    // get proposals on the initial render
+    const update = async () => {
+      await getProposals();
+    }
+    update();
+    const getBoxValue = async () => {
+      const initialBoxValue = await boxContract.methods.retrieve().call();
+      setBoxValue(initialBoxValue);
+    }
+    getBoxValue();
+    if (user) {
       const updateAvailableTokens = async () => {
         try {
           if (user) {
@@ -77,16 +76,18 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const updateAvailableTokens = async () => {
-      try {
-        const tokensAvailable = await getAvailableTokens(user);
-        console.log(tokensAvailable);
-        setAvailableTokens(bigNumberToFloat(tokensAvailable));
-      } catch (error) {
-        console.log(error)
+    if (user) {
+      const updateAvailableTokens = async () => {
+        try {
+          const tokensAvailable = await getAvailableTokens(user);
+          console.log(tokensAvailable);
+          setAvailableTokens(bigNumberToFloat(tokensAvailable));
+        } catch (error) {
+          console.log(error)
+        }
       }
+      updateAvailableTokens();
     }
-    updateAvailableTokens();
   }, [accountId, user])
 
   const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
@@ -136,26 +137,26 @@ function App() {
     ).send({ from: user })
   }
 
-  const queue = async () => {
-    const encodedData = encodeData(21);
-    console.log(encodedData);
-    const descriptionHash = hashDescription("We need to change it to 21!");
+  const queue = async (proposal: Proposal) => {
+    const boxAddr = proposal.targets[0];
+    console.log("Box", boxAddr);
+    const descriptionHash = hashDescription(proposal.description);
     await governorContract.methods.queue(
-      [boxAddressRB],
+      [boxAddr],
       [0],
-      [encodedData],
+      proposal.calldatas,
       descriptionHash
     ).send({ from: user })
   }
 
-  const execute = async () => {
-    const encodedData = encodeData(21);
-    console.log(encodedData);
-    const descriptionHash = hashDescription("We need to change it to 21!");
+  const execute = async (proposal: Proposal) => {
+    const boxAddr = proposal.targets[0];
+    console.log("Box", boxAddr);
+    const descriptionHash = hashDescription(proposal.description);
     await governorContract.methods.execute(
-      [boxAddressRB],
+      [boxAddr],
       [0],
-      [encodedData],
+      proposal.calldatas,
       descriptionHash
     ).send({ from: user })
     console.log("Updating Box...")

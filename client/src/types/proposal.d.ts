@@ -9,7 +9,7 @@ declare interface Proposal {
   proposer: string;
   proposalId: string;
   calldatas: Array<string>;
-  description: number;
+  description: string;
   targets: Array<string>;
   state: number;
 }

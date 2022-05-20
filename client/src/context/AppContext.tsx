@@ -52,6 +52,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       if (!window.ethereum) return alert("Please install Metamask!")
 
       const walletAccounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      // const walletAccounts = await window.ethereum.request({ method: "eth_accounts" });
       console.log(walletAccounts);
       setUser(walletAccounts[0]);
 

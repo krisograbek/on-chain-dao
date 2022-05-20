@@ -183,14 +183,14 @@ const ProposalPage = ({ proposals, vote, queue, execute, governorContract, user,
         {stateEnum[state] === "Succeeded" && (
           <Grid item sm={12} sx={{ py: 5 }}>
             <Grid container>
-              <Button onClick={e => queue()}>Queue</Button>
+              <Button onClick={e => queue(proposal)}>Queue</Button>
             </Grid>
           </Grid>
         )}
         {stateEnum[state] === "Queued" && (
           <Grid item sm={12} sx={{ py: 5 }}>
             <Grid container>
-              <Button onClick={e => execute()}>Execute</Button>
+              <Button onClick={e => execute(proposal)}>Execute</Button>
             </Grid>
           </Grid>
         )}
