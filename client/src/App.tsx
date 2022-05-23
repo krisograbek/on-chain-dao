@@ -1,40 +1,17 @@
 import Box from '@mui/material/Box';
-import React, { MouseEventHandler, useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Route, Routes } from "react-router-dom";
 import { EventEmitter } from 'stream';
-import Web3 from 'web3';
-import { Contract } from 'web3-eth-contract';
-import { utils } from 'ethers';
 
 import './App.css';
 import Home from './components/Home';
 import Navbar from './components/Navbar';
 import ProposalPage from './components/Proposals/ProposalPage';
 import Proposals from './components/Proposals/Proposals';
-import { boxAbi, boxAddress, boxAddressRB, governorAbi, governorAddress, governorAddressRB, tokenAbi, tokenAddress, tokenAddressRB } from './utils/constants';
 import { bigNumberToFloat, hashDescription } from './utils/helpers';
+import { AppContext } from './context/AppContext';
+import { boxAddressRB } from './utils/constants';
 
-
-let web3: Web3;
-let governorContract: Contract;
-let boxContract: Contract;
-let tokenContract: Contract;
-
-if (window.ethereum) {
-  console.log("Metamask detected")
-  web3 = new Web3(window.ethereum);
-  // const web3 = new Web3(window.ethereum)
-  governorContract = new web3.eth.Contract(governorAbi, governorAddressRB);
-  boxContract = new web3.eth.Contract(boxAbi, boxAddressRB);
-  tokenContract = new web3.eth.Contract(tokenAbi, tokenAddressRB);
-} else {
-  // using local node
-  web3 = new Web3("ws://localhost:8545");
-  governorContract = new web3.eth.Contract(governorAbi, governorAddress);
-  boxContract = new web3.eth.Contract(boxAbi, boxAddress);
-  tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
-
-}
 
 const accounts = [
   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
@@ -55,41 +32,15 @@ type EventReturn = {
   returnValues: any
 }
 
-const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
-  // name may also be a parameter of this function
-  name: 'store',
-  type: 'function',
-  inputs: [{
-    type: 'uint256',
-    name: 'newValue'
-  }]
-}, [`${data}`]);
-
 function App() {
   const [proposals, setProposals] = useState<Array<Proposal>>([]);
   const [boxValue, setBoxValue] = useState<number>(0);
   const [accountId, setAccountId] = useState<number>(0);
   const [availableTokens, setAvailableTokens] = useState<number>(0);
-  const [user, setUser] = useState<string>("");
-
-  // console.log(availableTokens)
-
-  const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
-    const getProposals = events.map(async (event: EventReturn) => {
-      const { proposer, proposalId, calldatas, description, targets } = event.returnValues;
-      const state = await governorContract.methods.state(proposalId).call();
-      const proposal: Proposal = { proposer, proposalId, calldatas, description, targets, state };
-      console.log("Proposal", proposal);
-      return proposal;
-    });
-    // events.map calls an async function
-    // Promise.all() is required when we await an Array mapping
-    const allProposals = await Promise.all(getProposals);
-    return allProposals;
-  }
+  const { user, governorContract, boxContract, tokenContract, web3, connectWallet } = useContext(AppContext);
 
   useEffect(() => {
-    // subscribe to the ProposalCreated event 
+    // subscribe to the ProposalCreated event
     governorContract.events.ProposalCreated({
       fromBlock: "latest"
     })
@@ -109,31 +60,59 @@ function App() {
       setBoxValue(initialBoxValue);
     }
     getBoxValue();
-    const updateAvailableTokens = async () => {
-      try {
-        if (user) {
-          const tokensAvailable = await getAvailableTokens(user);
-          console.log(tokensAvailable);
+    if (user) {
+      const updateAvailableTokens = async () => {
+        try {
+          if (user) {
+            const tokensAvailable = await getAvailableTokens(user);
+            console.log(tokensAvailable);
+          }
+        } catch (error) {
+          console.log(error)
         }
-      } catch (error) {
-        console.log(error)
       }
+      updateAvailableTokens();
     }
-    updateAvailableTokens();
   }, []);
 
   useEffect(() => {
-    const updateAvailableTokens = async () => {
-      try {
-        const tokensAvailable = await getAvailableTokens(user);
-        console.log(tokensAvailable);
-        setAvailableTokens(bigNumberToFloat(tokensAvailable));
-      } catch (error) {
-        console.log(error)
+    if (user) {
+      const updateAvailableTokens = async () => {
+        try {
+          const tokensAvailable = await getAvailableTokens(user);
+          console.log(tokensAvailable);
+          setAvailableTokens(bigNumberToFloat(tokensAvailable));
+        } catch (error) {
+          console.log(error)
+        }
       }
+      updateAvailableTokens();
     }
-    updateAvailableTokens();
   }, [accountId, user])
+
+  const encodeData = (data: any) => web3.eth.abi.encodeFunctionCall({
+    // name may also be a parameter of this function
+    name: 'store',
+    type: 'function',
+    inputs: [{
+      type: 'uint256',
+      name: 'newValue'
+    }]
+  }, [`${data}`]);
+
+  const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
+    const getProposals = events.map(async (event: EventReturn) => {
+      const { proposer, proposalId, calldatas, description, targets } = event.returnValues;
+      const state = await governorContract.methods.state(proposalId).call();
+      const proposal: Proposal = { proposer, proposalId, calldatas, description, targets, state };
+      console.log("Proposal", proposal);
+      return proposal;
+    });
+    // events.map calls an async function
+    // Promise.all() is required when we await an Array mapping
+    const allProposals = await Promise.all(getProposals);
+    return allProposals;
+  }
 
   const getProposals = async () => {
     try {
@@ -155,31 +134,31 @@ function App() {
       proposalId,
       votingWay,
       reason
-    ).send({ from: accounts[accountId] })
+    ).send({ from: user })
   }
 
-  const queue = async () => {
-    const encodedData = encodeData(21);
-    console.log(encodedData);
-    const descriptionHash = hashDescription("We need to change it to 21!");
+  const queue = async (proposal: Proposal) => {
+    const boxAddr = proposal.targets[0];
+    console.log("Box", boxAddr);
+    const descriptionHash = hashDescription(proposal.description);
     await governorContract.methods.queue(
-      [boxAddress],
+      [boxAddr],
       [0],
-      [encodedData],
+      proposal.calldatas,
       descriptionHash
-    ).send({ from: accounts[accountId] })
+    ).send({ from: user })
   }
 
-  const execute = async () => {
-    const encodedData = encodeData(21);
-    console.log(encodedData);
-    const descriptionHash = hashDescription("We need to change it to 21!");
+  const execute = async (proposal: Proposal) => {
+    const boxAddr = proposal.targets[0];
+    console.log("Box", boxAddr);
+    const descriptionHash = hashDescription(proposal.description);
     await governorContract.methods.execute(
-      [boxAddress],
+      [boxAddr],
       [0],
-      [encodedData],
+      proposal.calldatas,
       descriptionHash
-    ).send({ from: accounts[accountId] })
+    ).send({ from: user })
     console.log("Updating Box...")
     const newBoxValue = await boxContract.methods.retrieve().call();
     setBoxValue(newBoxValue);
@@ -192,18 +171,12 @@ function App() {
     return tokensAvailable;
   }
 
-  const connectWallet = async () => {
-    const walletAccounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-    console.log(walletAccounts);
-    setUser(walletAccounts[0]);
-  }
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
     e.preventDefault();
     const encodedData = encodeData(formData.value);
 
     await governorContract.methods.propose(
-      [boxAddress],
+      [boxAddressRB],
       [0],
       [encodedData],
       formData.description
@@ -218,7 +191,7 @@ function App() {
         queue={queue}
         execute={execute}
         governorContract={governorContract}
-        user={accounts[accountId]}
+        user={user}
         availableTokens={availableTokens}
       />
     )
