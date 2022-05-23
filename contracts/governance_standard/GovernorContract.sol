@@ -16,6 +16,8 @@ contract GovernorContract is
     GovernorVotesQuorumFraction,
     GovernorTimelockControl
 {
+    uint256[] public newProposals;
+
     constructor(
         IVotes _token,
         TimelockController _timelock,
@@ -81,12 +83,34 @@ contract GovernorContract is
         return super.state(proposalId);
     }
 
+    function hashProposal(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    ) public pure virtual override(Governor, IGovernor) returns (uint256) {
+        return
+            uint256(
+                keccak256(
+                    abi.encode(targets, values, calldatas, descriptionHash)
+                )
+            );
+    }
+
     function propose(
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas,
         string memory description
     ) public override(Governor, IGovernor) returns (uint256) {
+        bytes32 descriptionHash = bytes32(keccak256(abi.encode(description)));
+        uint256 newId = hashProposal(
+            targets,
+            values,
+            calldatas,
+            descriptionHash
+        );
+        newProposals.push(newId);
         return super.propose(targets, values, calldatas, description);
     }
 

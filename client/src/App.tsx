@@ -181,6 +181,9 @@ function App() {
       [encodedData],
       formData.description
     ).send({ from: user })
+
+    const array = await governorContract.methods.newProposals().call()
+    console.log("Array after proposing", array)
   }
 
   const proposalElement = () => {
