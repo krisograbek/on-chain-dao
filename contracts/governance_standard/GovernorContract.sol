@@ -103,7 +103,7 @@ contract GovernorContract is
         bytes[] memory calldatas,
         string memory description
     ) public override(Governor, IGovernor) returns (uint256) {
-        bytes32 descriptionHash = bytes32(keccak256(abi.encode(description)));
+        bytes32 descriptionHash = keccak256(bytes(description));
         uint256 newId = hashProposal(
             targets,
             values,

@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from 'react'
+import React, { MouseEventHandler, useContext } from 'react'
 import AppBar from '@mui/material/AppBar';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
@@ -9,6 +9,7 @@ import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import { Link } from 'react-router-dom';
 import { shortenAddress } from '../utils/helpers';
+import { AppContext } from '../context/AppContext';
 
 type Props = {
   boxValue: number,
@@ -21,6 +22,8 @@ type Props = {
 }
 
 const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, connectWallet, user }: Props) => {
+
+  const isLocalDev = useContext(AppContext);
 
   const handleAccountChange = (e: SelectChangeEvent<number>) => {
     setAccountId(e.target.value);
@@ -39,7 +42,7 @@ const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, 
           Get Proposals
         </Button> */}
         <Typography>Box value: {boxValue}</Typography>
-        {!window.ethereum ? (
+        {isLocalDev ? (
           <FormControl variant="standard" sx={{ px: 3, m: 1, minWidth: 120 }}>
             <InputLabel id="demo-simple-select-filled-label" sx={{ px: 3, m: 1, minWidth: 120 }}>Account</InputLabel>
             <Select
