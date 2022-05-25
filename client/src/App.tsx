@@ -12,7 +12,6 @@ import { bigNumberToFloat, hashDescription } from './utils/helpers';
 import { AppContext } from './context/AppContext';
 import { boxAddressRB } from './utils/constants';
 
-
 const accounts = [
   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
   "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
@@ -181,6 +180,9 @@ function App() {
       [encodedData],
       formData.description
     ).send({ from: user })
+
+    const array = await governorContract.methods.newProposals(2).call()
+    console.log("Array after proposing", array)
   }
 
   const proposalElement = () => {
