@@ -37,6 +37,19 @@ or `yarn`
 $ yarn
 ```
 
+## Settings
+When you deploy the governor Contract, you pass parameters to it.
+```
+export const VOTING_DELAY = 1; //block
+export const VOTING_PERIOD = 5; //blocks
+export const QUORUM_PERCENTAGE = 4; // minimal number of votes to make it an eligable voting
+```
+Also, there is a minimum deley between queuing the proposal and it's execution. 
+```
+export const MIN_DELAY = 3600;
+```
+
+
 ## Run Local Hardhat Network
 
 ```
