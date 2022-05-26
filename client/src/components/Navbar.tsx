@@ -10,6 +10,7 @@ import InputLabel from '@mui/material/InputLabel';
 import { Link } from 'react-router-dom';
 import { shortenAddress } from '../utils/helpers';
 import { AppContext } from '../context/AppContext';
+import Grid from '@mui/material/Grid';
 
 type Props = {
   boxValue: number,
@@ -23,7 +24,7 @@ type Props = {
 
 const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, connectWallet, user }: Props) => {
 
-  const isLocalDev = useContext(AppContext);
+  const { isLocalDev } = useContext(AppContext);
 
   const handleAccountChange = (e: SelectChangeEvent<number>) => {
     setAccountId(e.target.value);
@@ -41,7 +42,15 @@ const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, 
         {/* <Button variant="contained" onClick={onClick}>
           Get Proposals
         </Button> */}
-        <Typography>Box value: {boxValue}</Typography>
+        <Typography sx={{ flexGrow: 1 }}>Box value: {boxValue}</Typography>
+        {/* <Grid item></Grid> */}
+        {user && (
+          <>
+            <Typography sx={{ px: 2 }}>You own {availableTokens} tokens </Typography>
+            <Typography sx={{ px: 2 }}>Account: {shortenAddress(user)}</Typography>
+          </>
+        )
+        }
         {isLocalDev ? (
           <FormControl variant="standard" sx={{ px: 3, m: 1, minWidth: 120 }}>
             <InputLabel id="demo-simple-select-filled-label" sx={{ px: 3, m: 1, minWidth: 120 }}>Account</InputLabel>
@@ -57,10 +66,10 @@ const Navbar = ({ boxValue, accounts, accountId, setAccountId, availableTokens, 
             </Select>
           </FormControl>
         ) : (
-          <Button onClick={connectWallet}>Connect Wallet</Button>
+          !user && (
+            <Button variant="contained" onClick={connectWallet}>Connect Wallet</Button>
+          )
         )}
-        <Typography sx={{ px: 2 }}>You own {availableTokens} tokens </Typography>
-        <Typography>Account: {shortenAddress(user)}</Typography>
       </Toolbar>
     </AppBar>
   )

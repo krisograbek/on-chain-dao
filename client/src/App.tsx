@@ -101,16 +101,19 @@ function App() {
 
   const updateProposals = async (events: Array<EventReturn>): Promise<Array<Proposal>> => {
     const getProposals = events.map(async (event: EventReturn) => {
-      const { proposer, proposalId, calldatas, description, targets } = event.returnValues;
+      // console.log(event)
+      const { proposer, proposalId, calldatas, description, targets, startBlock } = event.returnValues;
       const state = await governorContract.methods.state(proposalId).call();
-      const proposal: Proposal = { proposer, proposalId, calldatas, description, targets, state };
+      const proposal: Proposal = { proposer, proposalId, calldatas, description, targets, state, startBlock };
       console.log("Proposal", proposal);
       return proposal;
     });
     // events.map calls an async function
     // Promise.all() is required when we await an Array mapping
     const allProposals = await Promise.all(getProposals);
-    return allProposals;
+    // reverse order of propsals to see the newest on top
+    const sorted = allProposals.sort((el1, el2) => parseInt(el2.startBlock) - parseInt(el1.startBlock))
+    return sorted;
   }
 
   const getProposals = async () => {
