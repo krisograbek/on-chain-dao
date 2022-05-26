@@ -12,6 +12,7 @@ declare interface Proposal {
   description: string;
   targets: Array<string>;
   state: number;
+  startBlock: string;
 }
 
 declare interface VoteInterface {

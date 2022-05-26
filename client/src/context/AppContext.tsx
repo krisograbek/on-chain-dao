@@ -14,7 +14,7 @@ type AppContextProps = {
   connectWallet: MouseEventHandler<HTMLButtonElement>
 }
 
-const isLocalDev = true;
+const isLocalDev = false;
 
 const web3 = isLocalDev ? new Web3("ws://localhost:8545") : new Web3(window.ethereum);
 
