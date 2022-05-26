@@ -49,7 +49,6 @@ Also, there is a minimum deley between queuing the proposal and it's execution.
 export const MIN_DELAY = 3600;
 ```
 
-
 ## Run Local Hardhat Network
 
 ```
@@ -71,6 +70,13 @@ And update the parameters: `PRIVATE_KEY` and `RINKEBY_URL`
 
 ```
 $ npx hardhat deploy --network rinkeby
+```
+### Update Contract Adresses
+After you deploy your own Contracts, you have to update Adresses. Please, open the `client/src/utils/constants.ts` file and update following variables:
+```
+export const governorAddressRB: string = 'PASTE GOVERNOR ADDRESS HERE';
+export const boxAddressRB: string = 'PASTE BOX ADDRESS HERE';
+export const tokenAddressRB: string = 'PASTE TOKEN ADDRESS HERE';
 ```
 
 ## Run Frontend
